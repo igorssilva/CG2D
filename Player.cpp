@@ -1,6 +1,6 @@
-#include "player.h"
+#include "Player.h"
 #include <math.h>
-#include "transformations.h"
+#include "Transformations.h"
 
 using namespace std;
 
@@ -289,9 +289,138 @@ bool Player::isHitting(Player *player) {
     }
 
     dist = sqrt(pow(xLuvaEsquerda - x, 2) + pow(yLuvaEsquerda - y, 2));
-    if (dist < +radiusHand) {
+    if (dist < radius + radiusHand) {
         return true;
     }
 
     return false;
+}
+
+
+void Player::DefineMove(unsigned char key) {
+    switch (key) {
+        case 'a':
+        case 'A':
+            this->attackStance = false;
+            this->ResetaBracos();
+            this->keyStatus[(int) ('a')] = 1; // Using keyStatus trick
+            break;
+        case 'd':
+        case 'D':
+            this->attackStance = false;
+            this->ResetaBracos();
+            this->keyStatus[(int) ('d')] = 1; // Using keyStatus trick
+            break;
+
+        case 'w':
+        case 'W':
+            this->attackStance = false;
+            this->ResetaBracos();
+            this->keyStatus[(int) ('w')] = 1; // Using keyStatus trick
+            break;
+        case 's':
+        case 'S':
+            this->attackStance = false;
+            this->ResetaBracos();
+            this->keyStatus[(int) ('s')] = 1; // Using keyStatus trick
+            break;
+    }
+}
+
+
+void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *anotherPlayer) {
+    // Treat keyPress
+    if (this->keyStatus[(int) ('a')] && !this->keyStatus[(int) ('s')] && !this->keyStatus[(int) ('w')]) {
+        this->Rotate(INC_ROTATE * timeDifference);
+    }
+    if (this->keyStatus[(int) ('d')] && !this->keyStatus[(int) ('s')] && !keyStatus[(int) ('w')]) {
+        this->Rotate(-INC_ROTATE * timeDifference);
+    }
+    if (this->keyStatus[(int) ('s')]) {
+        if (this->keyStatus[(int) ('a')]) {
+            this->Rotate(INC_ROTATE / 5 * timeDifference);
+        }
+        if (this->keyStatus[(int) ('d')]) {
+            this->Rotate(-INC_ROTATE / 5 * timeDifference);
+        }
+        this->Move(-INC_MOVE * timeDifference);
+
+        if (!this->isInbound(width, height) || this->isColliding(anotherPlayer)) {
+            this->Move(INC_MOVE * timeDifference);
+        }
+    }
+    if (this->keyStatus[(int) ('w')]) {
+        if (this->keyStatus[(int) ('a')]) {
+            this->Rotate(INC_ROTATE / 5 * timeDifference);
+        }
+        if (this->keyStatus[(int) ('d')]) {
+            this->Rotate(-INC_ROTATE / 5 * timeDifference);
+        }
+        this->Move(INC_MOVE * timeDifference);
+        if (!this->isInbound(width, height) || this->isColliding(anotherPlayer)) {
+            this->Move(-INC_MOVE * timeDifference);
+        }
+    }
+}
+
+void Player::ResetKeyStatus() {
+    // Initialize keyStatus
+    for (int i = 0; i < 256; i++)
+        this->keyStatus[i] = 0;
+}
+
+void Player::UpdateMove(unsigned char key) {
+    this->keyStatus[(int) (key)] = 0;
+}
+
+
+void Player::InitPunch(int button, int state, int currentPosition) {
+    switch (button) {
+        case GLUT_LEFT_BUTTON:
+            if (state == GLUT_DOWN) {
+                this->attackStance = true;
+                this->initialAttackPosition = currentPosition;
+            } else {
+                this->attackStance = false;
+                this->ResetaBracos();
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPlayer) {
+    if (this->attackStance) {
+
+        GLfloat inc;
+        if (currentPosition > this->initialAttackPosition) {
+            GLfloat dx = (GLfloat)(this->initialAttackPosition - currentPosition);
+            if (dx < -maxWidthPunch) {
+                dx = -maxWidthPunch;
+            }
+            inc = dx / maxWidthPunch;
+
+            this->RodaBracoDireito(inc * DEFAULT_ARM_ANGLE);
+            this->RodaBracoEsquerdo(DEFAULT_ARM_ANGLE);
+        } else if (currentPosition < this->initialAttackPosition) {
+            GLfloat dx = (GLfloat)(currentPosition - this->initialAttackPosition);
+            if (dx < -maxWidthPunch) {
+                dx = -maxWidthPunch;
+            }
+            inc = dx / maxWidthPunch;
+            this->RodaBracoEsquerdo(inc * DEFAULT_ARM_ANGLE);
+            this->RodaBracoDireito(DEFAULT_ARM_ANGLE);
+        }
+
+
+        if (this->isHitting(anotherPlayer)) {
+            if (!this->hit) {
+                this->hit = true;
+                anotherPlayer->TakeDamage(1);
+            }
+        } else {
+            this->hit = false;
+        }
+    }
 }

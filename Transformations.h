@@ -1,12 +1,12 @@
-#ifndef TRANSFORMATIONS_H
-#define TRANSFORMATIONS_H
+#ifndef CG2D_TRANSFORMATIONS_H
+#define CG2D_TRANSFORMATIONS_H
 
 #include <GL/gl.h>
 #include <GL/glu.h>
 
 #define dimensao 3
 
-/*Funções para transformações geométricas*/
+/*Funções para transformaç4ões geométricas*/
 
 float toRad(float degree);
 
@@ -20,4 +20,4 @@ void RotatePoint(GLfloat angle, GLfloat H[][dimensao]);
 
 void TranslatePoint(GLfloat dx, GLfloat dy, GLfloat H[][dimensao]);
 
-#endif
+#endif /* CG2D_TRANSFORMATIONS_H */

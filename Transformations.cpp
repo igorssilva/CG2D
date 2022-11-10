@@ -1,4 +1,4 @@
-#include "transformations.h"
+#include "Transformations.h"
 #include <math.h>
 
 void multiplyMatrixByVector(const GLfloat H[][dimensao], const GLfloat v[], GLfloat v_l[]) {

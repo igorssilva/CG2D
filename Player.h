@@ -1,5 +1,5 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#ifndef CG2D_PLAYER_H
+#define CG2D_PLAYER_H
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -7,6 +7,8 @@
 
 #define ARM_POSITION 90
 #define DEFAULT_ARM_ANGLE 45
+#define INC_MOVE 0.3
+#define INC_ROTATE 0.3
 
 class Player {
     GLfloat gX;
@@ -17,6 +19,11 @@ class Player {
     GLfloat gRadius;
     GLfloat playerColor[3];
     int hp;
+    bool attackStance;
+    bool hit;
+    int initialAttackPosition;
+// Key status
+    int keyStatus[256];
 
 private:
     void DesenhaRect(GLint height, GLint width,
@@ -36,6 +43,24 @@ private:
 
     void calculaPosicaoLuvaDireita(GLfloat &xLuvaDireita, GLfloat &yLuvaDireita);
 
+    void ResetKeyStatus();
+
+    void Rotate(GLfloat inc);
+
+    void Move(GLfloat inc);
+
+    void TakeDamage(int damage) {
+        hp -= damage;
+    };
+
+    bool isInbound(GLfloat width, GLfloat height);
+
+    bool isColliding(Player *player);
+
+    bool isHitting(Player *player);
+
+    void ResetaBracos();
+
 public:
     Player(GLfloat x, GLfloat y, GLfloat theta, GLfloat radius,
            GLfloat R, GLfloat G, GLfloat B) {
@@ -49,43 +74,34 @@ public:
         playerColor[1] = G;
         playerColor[2] = B;
         hp = 10;
+        this->ResetKeyStatus();
     };
 
-    void Rotate(GLfloat inc);
 
-    void Move(GLfloat inc);
+    void Move(GLdouble timeDifference, GLint width, GLint height, Player *anotherPlayer);
+
+    void DefineMove(unsigned char key);
+
+    void UpdateMove(unsigned char key);
 
     void RodaBracoDireito(GLfloat inc);
 
     void RodaBracoEsquerdo(GLfloat theta);
 
+    void InitPunch(int button, int state, int currentPosition);
+
+    void Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPlayer);
+
+
     void Desenha() {
         DesenhaPlayer(gX, gY, gTheta, gRadius, playerColor[0], playerColor[1], playerColor[2]);
     };
 
-    void ResetaBracos();
-
-    GLfloat ObtemX() {
-        return gX;
-    };
-
-    GLfloat ObtemY() {
-        return gY;
-    };
-
-    void TakeDamage(int damage) {
-        hp -= damage;
-    };
 
     int ObtemHp() {
         return hp;
     };
 
-    bool isInbound(GLfloat width, GLfloat height);
-
-    bool isColliding(Player *player);
-
-    bool isHitting(Player *player);
 };
 
-#endif /* PLAYER_H */
+#endif /* CG2D_PLAYER_H */

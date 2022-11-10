@@ -1,1 +1,0 @@
-CMakeLists.txt not found in /home/igor/CLionProjects/CG2D Select CMakeLists.txt
