@@ -102,6 +102,14 @@ public:
         return hp;
     };
 
+    int ObtemX() {
+        return gX;
+    };
+
+    int ObtemY() {
+        return gY;
+    };
+
 };
 
 #endif /* CG2D_PLAYER_H */

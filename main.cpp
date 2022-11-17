@@ -8,6 +8,8 @@
 #include "Player.h"
 #include "Transformations.h"
 
+#define LINE_HEIGHT 20
+
 using namespace tinyxml2;
 using namespace std;
 
@@ -26,7 +28,8 @@ bool gameOver;
 
 void loadArenaScenario(std::string svgFileName);
 
-void *font = GLUT_BITMAP_9_BY_15;
+void *font = GLUT_BITMAP_TIMES_ROMAN_24;
+
 
 void ImprimeTexto(const unsigned char *aText, void *aFont, GLfloat x, GLfloat y, GLfloat xOffset, GLfloat yOffset,
                   GLfloat R,
@@ -42,7 +45,7 @@ void ImprimeTexto(const unsigned char *aText, void *aFont, GLfloat x, GLfloat y,
     glRasterPos2f(0, y);
     while (*aText) {
         if (*aText == '\n') {
-            y += 15;
+            y += LINE_HEIGHT;
             glRasterPos2f(0, y);
         } else {
             glutBitmapCharacter(aFont, *aText);
@@ -100,11 +103,16 @@ void renderScene(void) {
     glutSwapBuffers(); // Desenha the new frame of the game.
 }
 
-void keyPress(unsigned char key, int x, int y) {
+
+void keyPress(unsigned char key, Player *p) {
     if (!gameOver) {
-        player->DefineMove(key);
-        npc->DefineMove(key);
+        p->DefineMove(key);
     }
+}
+
+void keyPress(unsigned char key, int x, int y) {
+
+    keyPress(key, player);
 
     switch (key) {
         case 'q':
@@ -119,22 +127,46 @@ void keyPress(unsigned char key, int x, int y) {
     glutPostRedisplay();
 }
 
-void mouse(int button, int state, int x, int y) {
+
+void mouse(int button, int state, int currentPosition, Player *p) {
     if (!gameOver) {
-        player->InitPunch(button, state, x);
-        npc->InitPunch(button, state, x);
+        p->InitPunch(button, state, currentPosition);
     }
+}
+
+void mouse(int button, int state, int x, int y) {
+
+    mouse(button, state, x, player);
     glutPostRedisplay();
+}
+
+void keyup(unsigned char key, Player *p) {
+    if (!gameOver) {
+        p->UpdateMove(key);
+    }
 }
 
 void keyup(unsigned char key, int x, int y) {
-    if (!gameOver) {
-        player->UpdateMove(key);
-        npc->UpdateMove(key);
-    }
+    keyup(key, player);
     glutPostRedisplay();
 }
 
+void motion(int x, int y, Player *p1, Player *p2) {
+    if (!gameOver) {
+        p1->Punch(maxWidthPunch, x, p2);
+    }
+}
+
+void motion(int x, int y) {
+    motion(x, y, player, npc);
+    glutPostRedisplay();
+}
+
+void move(GLdouble timeDifference, Player *p1, Player *p2) {
+    if (!gameOver) {
+        p1->Move(timeDifference, Width, Height, p2);
+    }
+}
 
 void idle(void) {
     static GLdouble previousTime = glutGet(GLUT_ELAPSED_TIME);
@@ -146,19 +178,15 @@ void idle(void) {
     // Atualiza o tempo do ultimo frame ocorrido
     previousTime = currentTime;
 
-    if (!gameOver) {
-        player->Move(timeDifference, Width, Height, npc);
-        npc->Move(timeDifference, Width, Height, player);
-    }
+    move(timeDifference, player, npc);
 
-    glutPostRedisplay();
-}
+    keyPress('d', npc);
 
-void motion(int x, int y) {
-    if (!gameOver) {
-        player->Punch(maxWidthPunch, x, npc);
-        npc->Punch(maxWidthPunch, x, player);
-    }
+    keyPress('w', npc);
+    move(timeDifference, npc, player);
+    mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, player->ObtemX(), npc);
+    motion(player->ObtemX(), player->ObtemY(), npc, player);
+
     glutPostRedisplay();
 }
 
