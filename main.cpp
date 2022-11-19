@@ -220,7 +220,6 @@ void move(GLdouble timeDifference, Player *p1, Player *p2) {
         p1->Move(timeDifference, Width, Height, p2);
     }
 }
-
 void moveNPC(GLdouble timeDifference) {
     if (!gameOver) {
 
@@ -231,46 +230,55 @@ void moveNPC(GLdouble timeDifference) {
         if (dist > player->ObtemRadius() * 2 + npc->ObtemRadius() * 2 + 20 && goForward) {
             keyPress('w', npc);
             keyup('s', npc);
-            move(timeDifference, npc, player);
         } else {
             keyup('w', npc);
+
+            if (recuar && dist < player->ObtemRadius() * 2 + npc->ObtemRadius() * 2 + 200) {
+                keyPress('s', npc);
+            } else {
+                recuar = false;
+                goForward = true;
+            }
+
             if (!punching) {
                 mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, Width / 2, npc);
                 punching = true;
+                goForward = false;
             }
 
 
             if (punching && angle >= 35) {
-                if (punchingCount == 10) {
+                if (punchingCount == 1) {
                     cout << "Disabled punch" << endl;
                     punchingCount = 0;
                     punching = false;
+                    recuar = true;
                     mouse(GLUT_LEFT_BUTTON, GLUT_UP, Width / 2, npc);
                 }
                 if (punchingPosition >= Width / 2) {
-                    cout << "Punching right" << endl;
                     punchingLeft = true;
                     punchingRight = false;
                     punchingCount++;
                 }
                 if (punchingPosition <= -Width / 2) {
-                    cout << "Punching left" << endl;
                     punchingLeft = false;
                     punchingRight = true;
                     punchingCount++;
                 }
 
                 if (punchingRight) {
+                    punchingPosition += 20;
                     motion(Width / 2 + punchingPosition, Height / 2, npc, player);
-                    punchingPosition += 10;
-                } else {
+                } else if (punchingLeft) {
+                    punchingPosition -= 20;
                     motion(Width / 2 + punchingPosition, Height / 2, npc, player);
-                    punchingPosition -= 10;
                 }
             }
 
 
         }
+
+        move(timeDifference, npc, player);
 
     }
 }
