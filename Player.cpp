@@ -127,6 +127,10 @@ void Player::DesenhaPlayer(GLfloat x, GLfloat y, GLfloat theta,
     // Draw both arms
     this->DesenhaBraco(this->gThetaR, this->gThetaL, radius);
 
+    // change the color of the circle if the player is hit
+    if (this->hit) {
+        B = B + 1;
+    }
     // Draw the nose (translate to the border of the circle)
     glPushMatrix();
     glTranslatef(radius + radius / 5 - 5, 0, 0.0);
@@ -135,6 +139,7 @@ void Player::DesenhaPlayer(GLfloat x, GLfloat y, GLfloat theta,
 
     // Draw body
     this->DesenhaCirc(radius, R, G, B);
+
     glPopMatrix();
 }
 
@@ -415,12 +420,12 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
 
 
         if (this->isHitting(anotherPlayer)) {
-            if (!this->hit) {
-                this->hit = true;
+            if (!anotherPlayer->hit) {
+                anotherPlayer->hit = true;
                 anotherPlayer->TakeDamage(1);
             }
         } else {
-            this->hit = false;
+            anotherPlayer->hit = false;
         }
     }
 }

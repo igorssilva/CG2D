@@ -75,6 +75,7 @@ public:
         playerColor[2] = B;
         hp = 10;
         this->ResetKeyStatus();
+        hit = false;
     };
 
 
@@ -108,6 +109,14 @@ public:
 
     int ObtemY() {
         return gY;
+    };
+
+    GLfloat ObtemTheta() {
+        return gTheta;
+    };
+
+    int ObtemRadius() {
+        return gRadius;
     };
 
 };

@@ -26,10 +26,21 @@ Player *npc;
 
 bool gameOver;
 
+bool inAction;
+
 void loadArenaScenario(std::string svgFileName);
 
 void *font = GLUT_BITMAP_TIMES_ROMAN_24;
 
+
+bool goForward = true;
+bool recuar = false;
+bool punching = false;
+int punchingPosition = 0;
+int punchingCount = 0;
+
+bool punchingRight = true;
+bool punchingLeft = false;
 
 void ImprimeTexto(const unsigned char *aText, void *aFont, GLfloat x, GLfloat y, GLfloat xOffset, GLfloat yOffset,
                   GLfloat R,
@@ -162,9 +173,105 @@ void motion(int x, int y) {
     glutPostRedisplay();
 }
 
+
+GLfloat angleToPlayer() {
+    GLfloat angleNpcToPlayer = toDeg(atan2(player->ObtemY() - npc->ObtemY(), player->ObtemX() - npc->ObtemX()));
+
+
+    GLfloat degree = npc->ObtemTheta() - angleNpcToPlayer;
+
+    return degree;
+}
+
+GLfloat distance() {
+    GLfloat distance = sqrt(pow(player->ObtemX() - npc->ObtemX(), 2) + pow(player->ObtemY() - npc->ObtemY(), 2));
+
+    return distance;
+}
+
+void directionFromAngle(GLfloat angle) {
+    if (!punching) {
+        if (angle < 0) {
+            keyPress('a', npc);
+            keyup('d', npc);
+        } else if (angle > 0) {
+            keyPress('d', npc);
+            keyup('a', npc);
+        }
+    } else {
+        if (abs(angle) < 35 && punchingRight) {
+            keyPress('a', npc);
+            keyup('d', npc);
+
+        } else if (abs(angle) < 35 && punchingLeft) {
+            keyPress('d', npc);
+            keyup('a', npc);
+        } else {
+
+            keyup('a', npc);
+            keyup('d', npc);
+        }
+    }
+}
+
+
 void move(GLdouble timeDifference, Player *p1, Player *p2) {
     if (!gameOver) {
         p1->Move(timeDifference, Width, Height, p2);
+    }
+}
+
+void moveNPC(GLdouble timeDifference) {
+    if (!gameOver) {
+
+        GLfloat angle = angleToPlayer();
+        directionFromAngle(angle);
+        GLfloat dist = distance();
+
+        if (dist > player->ObtemRadius() * 2 + npc->ObtemRadius() * 2 + 20 && goForward) {
+            keyPress('w', npc);
+            keyup('s', npc);
+            move(timeDifference, npc, player);
+        } else {
+            keyup('w', npc);
+            if (!punching) {
+                mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, Width / 2, npc);
+                punching = true;
+            }
+
+
+            if (punching && angle >= 35) {
+                if (punchingCount == 10) {
+                    cout << "Disabled punch" << endl;
+                    punchingCount = 0;
+                    punching = false;
+                    mouse(GLUT_LEFT_BUTTON, GLUT_UP, Width / 2, npc);
+                }
+                if (punchingPosition >= Width / 2) {
+                    cout << "Punching right" << endl;
+                    punchingLeft = true;
+                    punchingRight = false;
+                    punchingCount++;
+                }
+                if (punchingPosition <= -Width / 2) {
+                    cout << "Punching left" << endl;
+                    punchingLeft = false;
+                    punchingRight = true;
+                    punchingCount++;
+                }
+
+                if (punchingRight) {
+                    motion(Width / 2 + punchingPosition, Height / 2, npc, player);
+                    punchingPosition += 10;
+                } else {
+                    motion(Width / 2 + punchingPosition, Height / 2, npc, player);
+                    punchingPosition -= 10;
+                }
+            }
+
+
+        }
+
     }
 }
 
@@ -179,13 +286,8 @@ void idle(void) {
     previousTime = currentTime;
 
     move(timeDifference, player, npc);
+    moveNPC(timeDifference);
 
-    keyPress('d', npc);
-
-    keyPress('w', npc);
-    move(timeDifference, npc, player);
-    mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, player->ObtemX(), npc);
-    motion(player->ObtemX(), player->ObtemY(), npc, player);
 
     glutPostRedisplay();
 }
