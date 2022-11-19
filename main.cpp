@@ -233,7 +233,7 @@ void moveNPC(GLdouble timeDifference) {
         } else {
             keyup('w', npc);
 
-            if (recuar && dist < player->ObtemRadius() * 2 + npc->ObtemRadius() * 2 + 200) {
+            if (recuar && dist < player->ObtemRadius() * 2 + npc->ObtemRadius() * 2 + 20) {
                 keyPress('s', npc);
             } else {
                 recuar = false;
@@ -243,6 +243,7 @@ void moveNPC(GLdouble timeDifference) {
             if (!punching) {
                 mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, Width / 2, npc);
                 punching = true;
+                punchingRight = true;
                 goForward = false;
             }
 
@@ -252,6 +253,8 @@ void moveNPC(GLdouble timeDifference) {
                     cout << "Disabled punch" << endl;
                     punchingCount = 0;
                     punching = false;
+                    punchingLeft = false;
+                    punchingRight = false;
                     recuar = true;
                     mouse(GLUT_LEFT_BUTTON, GLUT_UP, Width / 2, npc);
                 }
@@ -268,9 +271,11 @@ void moveNPC(GLdouble timeDifference) {
 
                 if (punchingRight) {
                     punchingPosition += 20;
+                    cout << "Punching right" << endl;
                     motion(Width / 2 + punchingPosition, Height / 2, npc, player);
                 } else if (punchingLeft) {
                     punchingPosition -= 20;
+                    cout << "Punching left" << endl;
                     motion(Width / 2 + punchingPosition, Height / 2, npc, player);
                 }
             }
@@ -278,7 +283,7 @@ void moveNPC(GLdouble timeDifference) {
 
         }
 
-        move(timeDifference, npc, player);
+        move(5, npc, player);
 
     }
 }
