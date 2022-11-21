@@ -166,31 +166,21 @@ void Player::RodaBracoEsquerdo(GLfloat theta) {
 }
 
 bool Player::isInbound(GLfloat width, GLfloat height) {
-    GLfloat radius = this->gRadius;
-    GLfloat x = this->gX;
-    GLfloat y = this->gY;
 
-    if (x + radius > width || x - radius < 0) {
+    if (this->gX + this->gRadius > width || this->gX - this->gRadius < 0) {
         return false;
     }
-    if (y + radius > height || y - radius < 0) {
+    if (this->gY + this->gRadius > height || this->gY - this->gRadius < 0) {
         return false;
     }
     return true;
 }
 
 bool Player::isColliding(Player *player) {
-    GLfloat radius = this->gRadius * 2;
-    GLfloat x = this->gX;
-    GLfloat y = this->gY;
 
-    GLfloat radius2 = player->gRadius * 2;
-    GLfloat x2 = player->gX;
-    GLfloat y2 = player->gY;
+    GLfloat dist = this->distance(player);
 
-    GLfloat dist = sqrt(pow(x - x2, 2) + pow(y - y2, 2));
-
-    if (dist < radius + radius2) {
+    if (dist < this->ObtemRadiusColisao() + player->ObtemRadiusColisao()) {
         return true;
     }
     return false;
@@ -202,7 +192,7 @@ void Player::calculaPosicaoLuvaDireita(GLfloat &xLuvaDireita, GLfloat &yLuvaDire
     // Define a matriz de identidade
     initializeMatrixIdentity(H);
     GLfloat radius = this->gRadius;
-    GLfloat width = radius * 2;
+    GLfloat width = this->ObtemRadiusColisao();
 
 
     //  Move to Position of glove
@@ -242,7 +232,7 @@ void Player::calculaPosicaoLuvaEsquerda(GLfloat &xLuvaEsquerda, GLfloat &yLuvaEs
     // Define a matriz de identidade
     initializeMatrixIdentity(H);
     GLfloat radius = this->gRadius;
-    GLfloat width = radius * 2;
+    GLfloat width = this->ObtemRadiusColisao();
 
 
     //  Move to Position of glove
@@ -334,9 +324,15 @@ void Player::DefineMove(unsigned char key) {
 
 
 void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *anotherPlayer) {
+
+    if (this->keyStatus[(int) ('a')] || this->keyStatus[(int) ('d')] || this->keyStatus[(int) ('w')] ||
+        this->keyStatus[(int) ('s')]) {
+        anotherPlayer->hit = false;
+    }
     // Treat keyPress
     if (this->keyStatus[(int) ('a')] && !this->keyStatus[(int) ('s')] && !this->keyStatus[(int) ('w')]) {
         this->Rotate(INC_ROTATE * timeDifference);
+
     }
     if (this->keyStatus[(int) ('d')] && !this->keyStatus[(int) ('s')] && !keyStatus[(int) ('w')]) {
         this->Rotate(-INC_ROTATE * timeDifference);
@@ -379,7 +375,7 @@ void Player::UpdateMove(unsigned char key) {
 }
 
 
-void Player::InitPunch(int button, int state, int currentPosition) {
+void Player::InitPunch(int button, int state, int currentPosition, Player *p) {
     switch (button) {
         case GLUT_LEFT_BUTTON:
             if (state == GLUT_DOWN) {
@@ -388,6 +384,7 @@ void Player::InitPunch(int button, int state, int currentPosition) {
             } else {
                 this->attackStance = false;
                 this->ResetaBracos();
+                p->hit = false;
             }
             break;
         default:
@@ -399,6 +396,8 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
     if (this->attackStance) {
 
         GLfloat inc;
+
+        // Punching with right arm
         if (currentPosition > this->initialAttackPosition) {
             GLfloat dx = (GLfloat)(this->initialAttackPosition - currentPosition);
             if (dx < -maxWidthPunch) {
@@ -408,14 +407,16 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
 
             this->RodaBracoDireito(inc * DEFAULT_ARM_ANGLE);
             this->RodaBracoEsquerdo(DEFAULT_ARM_ANGLE);
-        } else if (currentPosition < this->initialAttackPosition) {
-            GLfloat dx = (GLfloat)(currentPosition - this->initialAttackPosition);
-            if (dx < -maxWidthPunch) {
-                dx = -maxWidthPunch;
+        } else {// Punching with left arm
+            if (currentPosition < this->initialAttackPosition) {
+                GLfloat dx = (GLfloat)(currentPosition - this->initialAttackPosition);
+                if (dx < -maxWidthPunch) {
+                    dx = -maxWidthPunch;
+                }
+                inc = dx / maxWidthPunch;
+                this->RodaBracoEsquerdo(inc * DEFAULT_ARM_ANGLE);
+                this->RodaBracoDireito(DEFAULT_ARM_ANGLE);
             }
-            inc = dx / maxWidthPunch;
-            this->RodaBracoEsquerdo(inc * DEFAULT_ARM_ANGLE);
-            this->RodaBracoDireito(DEFAULT_ARM_ANGLE);
         }
 
 

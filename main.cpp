@@ -139,15 +139,15 @@ void keyPress(unsigned char key, int x, int y) {
 }
 
 
-void mouse(int button, int state, int currentPosition, Player *p) {
+void mouse(int button, int state, int currentPosition, Player *p1, Player *p2) {
     if (!gameOver) {
-        p->InitPunch(button, state, currentPosition);
+        p1->InitPunch(button, state, currentPosition, p2);
     }
 }
 
 void mouse(int button, int state, int x, int y) {
 
-    mouse(button, state, x, player);
+    mouse(button, state, x, player, npc);
     glutPostRedisplay();
 }
 
@@ -183,35 +183,16 @@ GLfloat angleToPlayer() {
     return degree;
 }
 
-GLfloat distance() {
-    GLfloat distance = sqrt(pow(player->ObtemX() - npc->ObtemX(), 2) + pow(player->ObtemY() - npc->ObtemY(), 2));
 
-    return distance;
-}
 
 void directionFromAngle(GLfloat angle) {
-    if (!punching) {
-        if (angle < 0) {
-            keyPress('a', npc);
-            keyup('d', npc);
-        } else if (angle > 0) {
-            keyPress('d', npc);
-            keyup('a', npc);
-        }
-    } else {
-        if (abs(angle) < 35 && punchingRight) {
-            keyPress('a', npc);
-            keyup('d', npc);
 
-        } else if (abs(angle) < 35 && punchingLeft) {
-            keyPress('d', npc);
-            keyup('a', npc);
-        } else {
+    if (abs(angle) > 2) {
 
-            keyup('a', npc);
-            keyup('d', npc);
-        }
+        keyPress('d', npc);
+        keyup('a', npc);
     }
+
 }
 
 
@@ -220,43 +201,31 @@ void move(GLdouble timeDifference, Player *p1, Player *p2) {
         p1->Move(timeDifference, Width, Height, p2);
     }
 }
+
 void moveNPC(GLdouble timeDifference) {
     if (!gameOver) {
 
+        GLfloat dist = npc->distance(player);
         GLfloat angle = angleToPlayer();
-        directionFromAngle(angle);
-        GLfloat dist = distance();
-
-        if (dist > player->ObtemRadius() * 2 + npc->ObtemRadius() * 2 + 20 && goForward) {
+        if (dist > player->ObtemRadiusColisao() + npc->ObtemRadiusColisao() + 20) {
+            directionFromAngle(angle);
             keyPress('w', npc);
             keyup('s', npc);
+            move(timeDifference, npc, player);
+            punching = false;
+            punchingCount = 0;
         } else {
-            keyup('w', npc);
-
-            if (recuar && dist < player->ObtemRadius() * 2 + npc->ObtemRadius() * 2 + 20) {
-                keyPress('s', npc);
-            } else {
-                recuar = false;
-                goForward = true;
-            }
-
             if (!punching) {
-                mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, Width / 2, npc);
+                mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, Width / 2, npc, player);
                 punching = true;
                 punchingRight = true;
-                goForward = false;
-            }
-
-
-            if (punching && angle >= 35) {
-                if (punchingCount == 1) {
-                    cout << "Disabled punch" << endl;
+            } else if (punching) {
+                if (punchingCount == 5) {
                     punchingCount = 0;
                     punching = false;
                     punchingLeft = false;
                     punchingRight = false;
-                    recuar = true;
-                    mouse(GLUT_LEFT_BUTTON, GLUT_UP, Width / 2, npc);
+                    mouse(GLUT_LEFT_BUTTON, GLUT_UP, Width / 2, npc, player);
                 }
                 if (punchingPosition >= Width / 2) {
                     punchingLeft = true;
@@ -270,21 +239,14 @@ void moveNPC(GLdouble timeDifference) {
                 }
 
                 if (punchingRight) {
-                    punchingPosition += 20;
-                    cout << "Punching right" << endl;
+                    punchingPosition += 10;
                     motion(Width / 2 + punchingPosition, Height / 2, npc, player);
                 } else if (punchingLeft) {
-                    punchingPosition -= 20;
-                    cout << "Punching left" << endl;
+                    punchingPosition -= 10;
                     motion(Width / 2 + punchingPosition, Height / 2, npc, player);
                 }
             }
-
-
         }
-
-        move(5, npc, player);
-
     }
 }
 

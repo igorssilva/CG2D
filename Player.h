@@ -4,6 +4,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
+#include <math.h>
 
 #define ARM_POSITION 90
 #define DEFAULT_ARM_ANGLE 45
@@ -64,18 +65,18 @@ private:
 public:
     Player(GLfloat x, GLfloat y, GLfloat theta, GLfloat radius,
            GLfloat R, GLfloat G, GLfloat B) {
-        gX = x;
-        gY = y;
-        gTheta = theta;
-        gRadius = radius;
-        gThetaL = DEFAULT_ARM_ANGLE;
-        gThetaR = DEFAULT_ARM_ANGLE;
-        playerColor[0] = R;
-        playerColor[1] = G;
-        playerColor[2] = B;
-        hp = 10;
+        this->gX = x;
+        this->gY = y;
+        this->gTheta = theta;
+        this->gRadius = radius;
+        this->gThetaL = DEFAULT_ARM_ANGLE;
+        this->gThetaR = DEFAULT_ARM_ANGLE;
+        this->playerColor[0] = R;
+        this->playerColor[1] = G;
+        this->playerColor[2] = B;
+        this->hp = 10;
         this->ResetKeyStatus();
-        hit = false;
+        this->hit = false;
     };
 
 
@@ -89,36 +90,46 @@ public:
 
     void RodaBracoEsquerdo(GLfloat theta);
 
-    void InitPunch(int button, int state, int currentPosition);
+    void InitPunch(int button, int state, int currentPosition, Player *p);
 
     void Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPlayer);
 
 
     void Desenha() {
-        DesenhaPlayer(gX, gY, gTheta, gRadius, playerColor[0], playerColor[1], playerColor[2]);
+        DesenhaPlayer(this->gX, this->gY, this->gTheta, this->gRadius, this->playerColor[0], this->playerColor[1],
+                      this->playerColor[2]);
     };
 
 
     int ObtemHp() {
-        return hp;
+        return this->hp;
     };
 
     int ObtemX() {
-        return gX;
+        return this->gX;
     };
 
     int ObtemY() {
-        return gY;
+        return this->gY;
     };
 
     GLfloat ObtemTheta() {
-        return gTheta;
+        return this->gTheta;
     };
 
-    int ObtemRadius() {
-        return gRadius;
+    int ObtemRadiusColisao() {
+        return this->gRadius * 2;
     };
+
+    GLfloat distance(Player *p2) {
+        GLfloat distance = sqrt(pow(this->ObtemX() - p2->ObtemX(), 2) + pow(this->ObtemY() - p2->ObtemY(), 2));
+
+        return distance;
+    }
 
 };
+
+
+
 
 #endif /* CG2D_PLAYER_H */
