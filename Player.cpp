@@ -381,6 +381,7 @@ void Player::InitPunch(int button, int state, int currentPosition, Player *p) {
             if (state == GLUT_DOWN) {
                 this->attackStance = true;
                 this->initialAttackPosition = currentPosition;
+                this->lastAttackPosition = this->initialAttackPosition;
             } else {
                 this->attackStance = false;
                 this->ResetaBracos();
@@ -397,6 +398,7 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
 
         GLfloat inc;
 
+
         // Punching with right arm
         if (currentPosition > this->initialAttackPosition) {
             GLfloat dx = (GLfloat)(this->initialAttackPosition - currentPosition);
@@ -407,6 +409,14 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
 
             this->RodaBracoDireito(inc * DEFAULT_ARM_ANGLE);
             this->RodaBracoEsquerdo(DEFAULT_ARM_ANGLE);
+            if (this->isHitting(anotherPlayer) ) {
+                if (!anotherPlayer->hit && currentPosition > this->lastAttackPosition) {
+                    anotherPlayer->hit = true;
+                    anotherPlayer->TakeDamage(1);
+                }
+            } else {
+                anotherPlayer->hit = false;
+            }
         } else {// Punching with left arm
             if (currentPosition < this->initialAttackPosition) {
                 GLfloat dx = (GLfloat)(currentPosition - this->initialAttackPosition);
@@ -416,17 +426,23 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
                 inc = dx / maxWidthPunch;
                 this->RodaBracoEsquerdo(inc * DEFAULT_ARM_ANGLE);
                 this->RodaBracoDireito(DEFAULT_ARM_ANGLE);
+
+                if (this->isHitting(anotherPlayer) ) {
+                    if (!anotherPlayer->hit && currentPosition < this->lastAttackPosition) {
+                        anotherPlayer->hit = true;
+                        anotherPlayer->TakeDamage(1);
+                    }
+                } else {
+                    anotherPlayer->hit = false;
+                }
             }
         }
 
+        this->lastAttackPosition = currentPosition;
 
-        if (this->isHitting(anotherPlayer)) {
-            if (!anotherPlayer->hit) {
-                anotherPlayer->hit = true;
-                anotherPlayer->TakeDamage(1);
-            }
-        } else {
-            anotherPlayer->hit = false;
-        }
+
+
+
+
     }
 }

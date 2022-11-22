@@ -23,6 +23,7 @@ class Player {
     bool attackStance;
     bool hit;
     int initialAttackPosition;
+    int lastAttackPosition;
 // Key status
     int keyStatus[256];
 
