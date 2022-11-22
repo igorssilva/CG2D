@@ -8,12 +8,10 @@ CFLAGS  = -g -Wall
 LINKING = -lglut -lGL -lGLU
 TARGET = *
 
-build:
-	$(CXX) $(CFLAGS) -o out $(TARGET).cpp $(LINKING)
-
 all:
-	$(CXX) $(CFLAGS) -o out $(TARGET).cpp $(LINKING)
-	./out $(ARGS)
+	$(CXX) $(CFLAGS) -o trabalhocg $(TARGET).cpp $(LINKING)
 
+run:
+	./trabalhocg $(ARGS)
 clean:
-	$(RM) out
+	$(RM) trabalhocg
