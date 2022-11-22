@@ -13,5 +13,6 @@ all:
 
 run:
 	./trabalhocg $(ARGS)
+
 clean:
 	$(RM) trabalhocg
