@@ -9,6 +9,8 @@
 #include "Transformations.h"
 
 #define LINE_HEIGHT 20
+#define PUNCH_VELOCITY 10
+#define PUNCH_MAX 2
 
 using namespace tinyxml2;
 using namespace std;
@@ -35,7 +37,6 @@ void *font = GLUT_BITMAP_TIMES_ROMAN_24;
 
 bool goForward = true;
 bool recuar = false;
-bool punching = false;
 int punchingPosition = 0;
 int punchingCount = 0;
 
@@ -133,6 +134,12 @@ void keyPress(unsigned char key, int x, int y) {
             delete npc;
             loadArenaScenario(arenaFile);
             break;
+
+        case 'c':
+        case 'C':
+            player->switchCollision();
+            npc->switchCollision();
+            break;
     }
 
     glutPostRedisplay();
@@ -184,7 +191,6 @@ GLfloat angleToPlayer() {
 }
 
 
-
 void directionFromAngle(GLfloat angle) {
 
     if (abs(angle) > 2) {
@@ -201,32 +207,63 @@ void move(GLdouble timeDifference, Player *p1, Player *p2) {
         p1->Move(timeDifference, Width, Height, p2);
     }
 }
+GLfloat recuarLimit(int radius1, int radius2) {
+    return (radius1 + radius2) * 2;
+}
 
+GLfloat goForwardLimit(int radius1, int radius2) {
+    return (radius1 + radius2) + 5;
+}
 void moveNPC(GLdouble timeDifference) {
     if (!gameOver) {
 
         GLfloat dist = npc->distance(player);
         GLfloat angle = angleToPlayer();
-        if (dist > player->ObtemRadiusColisao() + npc->ObtemRadiusColisao() + 20) {
+
+
+        if (recuar && dist < recuarLimit(player->ObtemRadiusColisao(), npc->ObtemRadiusColisao())) {
+            keyPress('s', npc);
+            keyup('w', npc);
+            move(timeDifference, npc, player);
+        }
+
+        if (goForward && dist > goForwardLimit(player->ObtemRadiusColisao(), npc->ObtemRadiusColisao())) {
             directionFromAngle(angle);
             keyPress('w', npc);
             keyup('s', npc);
             move(timeDifference, npc, player);
-            punching = false;
-            punchingCount = 0;
-        } else {
-            if (!punching) {
+        }
+
+        if (dist >= recuarLimit(player->ObtemRadiusColisao(), npc->ObtemRadiusColisao())) {
+            goForward = true;
+            recuar = false;
+        }
+
+        if (dist <= goForwardLimit(player->ObtemRadiusColisao(), npc->ObtemRadiusColisao()) && goForward) {
+            goForward = false;
+            recuar = false;
+        }
+
+        if (!goForward && !recuar) {
+            keyup('w', npc);
+            keyup('s', npc);
+
+            if (punchingCount == 0) {
+                keyup('s', npc);
+                keyup('w', npc);
                 mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, Width / 2, npc, player);
-                punching = true;
                 punchingRight = true;
-            } else if (punching) {
-                if (punchingCount == 5) {
-                    punchingCount = 0;
-                    punching = false;
-                    punchingLeft = false;
-                    punchingRight = false;
-                    mouse(GLUT_LEFT_BUTTON, GLUT_UP, Width / 2, npc, player);
-                }
+                recuar = false;
+            }
+
+            if (punchingCount >= PUNCH_MAX) {
+                mouse(GLUT_LEFT_BUTTON, GLUT_UP, Width / 2, npc, player);
+                punchingCount = 0;
+                punchingPosition = 0;
+                punchingLeft = false;
+                punchingRight = false;
+                recuar = true;
+            } else {
                 if (punchingPosition >= Width / 2) {
                     punchingLeft = true;
                     punchingRight = false;
@@ -239,12 +276,15 @@ void moveNPC(GLdouble timeDifference) {
                 }
 
                 if (punchingRight) {
-                    punchingPosition += 10;
+                    punchingPosition += PUNCH_VELOCITY;
                     motion(Width / 2 + punchingPosition, Height / 2, npc, player);
                 } else if (punchingLeft) {
-                    punchingPosition -= 10;
+                    punchingPosition -= PUNCH_VELOCITY;
                     motion(Width / 2 + punchingPosition, Height / 2, npc, player);
+
                 }
+
+
             }
         }
     }

@@ -5,6 +5,7 @@
 using namespace std;
 
 
+
 void cart() {
     // Draw the cartesian plane of the object
 
@@ -39,7 +40,7 @@ void Player::DesenhaRect(GLint height, GLint width, GLfloat R, GLfloat G, GLfloa
     glEnd();
 }
 
-void Player::DesenhaCirc(GLint radius, GLfloat R, GLfloat G, GLfloat B) {
+void Player::DesenhaCirc(GLint radius, GLfloat R, GLfloat G, GLfloat B, CircleMode mode) {
 
     /* Define cor dos vértices com os valores R, G e B variando de 0.0 a 1.0 */
     glColor3f(R, G, B);
@@ -50,7 +51,14 @@ void Player::DesenhaCirc(GLint radius, GLfloat R, GLfloat G, GLfloat B) {
 
     glPointSize(3); // Tamanho dos pontos
 
-    glBegin(GL_POLYGON);
+    switch (mode) {
+        case CIRCLE_MODE_FILL:
+            glBegin(GL_POLYGON);
+            break;
+        case CIRCLE_MODE_LINE:
+            glBegin(GL_POINTS);
+            break;
+    }
     for (int i = 0; i < quantPoints; i++) {
         float theta = 2.0f * M_PI * float(i) / float(quantPoints); // get the current angle
 
@@ -66,7 +74,7 @@ void Player::DesenhaLuva(GLfloat radius, GLfloat R, GLfloat G, GLfloat B) {
     glPushMatrix();
 
     glTranslatef(radius, 0, 0.0);
-    this->DesenhaCirc(radius, R, G, B);
+    this->DesenhaCirc(radius, R, G, B, CIRCLE_MODE_FILL);
 
     glPopMatrix();
 }
@@ -134,11 +142,16 @@ void Player::DesenhaPlayer(GLfloat x, GLfloat y, GLfloat theta,
     // Draw the nose (translate to the border of the circle)
     glPushMatrix();
     glTranslatef(radius + radius / 5 - 5, 0, 0.0);
-    this->DesenhaCirc(radius / 5, R, G, B);
+    this->DesenhaCirc(radius / 5, R, G, B, CIRCLE_MODE_FILL);
     glPopMatrix();
 
     // Draw body
-    this->DesenhaCirc(radius, R, G, B);
+    this->DesenhaCirc(radius, R, G, B, CIRCLE_MODE_FILL);
+
+    // Draw collision circle
+    if (this->collisionShow) {
+        this->DesenhaCirc(this->ObtemRadiusColisao(), 1.0, 1.0, 1.0, CIRCLE_MODE_LINE);
+    }
 
     glPopMatrix();
 }
@@ -319,6 +332,7 @@ void Player::DefineMove(unsigned char key) {
             this->ResetaBracos();
             this->keyStatus[(int) ('s')] = 1; // Using keyStatus trick
             break;
+
     }
 }
 

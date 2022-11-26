@@ -26,13 +26,19 @@ class Player {
     int lastAttackPosition;
 // Key status
     int keyStatus[256];
+    bool collisionShow;
 
 private:
+    enum CircleMode {
+        CIRCLE_MODE_FILL,
+        CIRCLE_MODE_LINE
+    };
+
     void DesenhaRect(GLint height, GLint width,
                      GLfloat R, GLfloat G, GLfloat B);
 
     void DesenhaCirc(GLint radius, GLfloat R,
-                     GLfloat G, GLfloat B);
+                     GLfloat G, GLfloat B, CircleMode mode);
 
     void DesenhaLuva(GLfloat radius, GLfloat R, GLfloat G, GLfloat B);
 
@@ -63,6 +69,7 @@ private:
 
     void ResetaBracos();
 
+
 public:
     Player(GLfloat x, GLfloat y, GLfloat theta, GLfloat radius,
            GLfloat R, GLfloat G, GLfloat B) {
@@ -78,6 +85,7 @@ public:
         this->hp = 10;
         this->ResetKeyStatus();
         this->hit = false;
+        this->collisionShow = false;
     };
 
 
@@ -128,9 +136,13 @@ public:
         return distance;
     }
 
+
+    void switchCollision() {
+        this->collisionShow = !this->collisionShow;
+    }
+
+
 };
-
-
 
 
 #endif /* CG2D_PLAYER_H */
