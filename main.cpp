@@ -9,8 +9,6 @@
 #include "Transformations.h"
 
 #define LINE_HEIGHT 20
-#define PUNCH_VELOCITY 10
-#define PUNCH_MAX 2
 
 using namespace tinyxml2;
 using namespace std;
@@ -28,18 +26,17 @@ Player *npc;
 
 bool gameOver;
 
-bool inAction;
-
 void loadArenaScenario(std::string svgFileName);
 
 void *font = GLUT_BITMAP_TIMES_ROMAN_24;
 
-
+// Configurações iniciais de movimento do NPC
 bool goForward = true;
-bool recuar = false;
+bool goBackwards = false;
 int punchingPosition = 0;
 int punchingCount = 0;
-
+int punchVelocity = 10;
+int punchMaxCount = 2;
 bool punchingRight = true;
 bool punchingLeft = false;
 
@@ -140,9 +137,29 @@ void keyPress(unsigned char key, int x, int y) {
             player->switchCollision();
             npc->switchCollision();
             break;
+        case '+':
+            punchMaxCount++;
+            break;
+        case '-':
+            punchMaxCount--;
+            break;
+        case GLUT_KEY_PAGE_UP:
+            if (punchVelocity < 50) {
+                punchVelocity++;
+            }
+            break;
+        case GLUT_KEY_PAGE_DOWN:
+            if (punchVelocity > 10) {
+                punchVelocity--;
+            }
+            break;
     }
 
     glutPostRedisplay();
+}
+
+void specialFunc(int key, int x, int y) {
+    keyPress(key, x, y);
 }
 
 
@@ -207,13 +224,15 @@ void move(GLdouble timeDifference, Player *p1, Player *p2) {
         p1->Move(timeDifference, Width, Height, p2);
     }
 }
-GLfloat recuarLimit(int radius1, int radius2) {
+
+GLfloat goBackwardsLimit(int radius1, int radius2) {
     return (radius1 + radius2) * 2;
 }
 
 GLfloat goForwardLimit(int radius1, int radius2) {
     return (radius1 + radius2) + 5;
 }
+
 void moveNPC(GLdouble timeDifference) {
     if (!gameOver) {
 
@@ -221,7 +240,7 @@ void moveNPC(GLdouble timeDifference) {
         GLfloat angle = angleToPlayer();
 
 
-        if (recuar && dist < recuarLimit(player->ObtemRadiusColisao(), npc->ObtemRadiusColisao())) {
+        if (goBackwards && dist < goBackwardsLimit(player->ObtemRadiusColisao(), npc->ObtemRadiusColisao())) {
             keyPress('s', npc);
             keyup('w', npc);
             move(timeDifference, npc, player);
@@ -234,17 +253,17 @@ void moveNPC(GLdouble timeDifference) {
             move(timeDifference, npc, player);
         }
 
-        if (dist >= recuarLimit(player->ObtemRadiusColisao(), npc->ObtemRadiusColisao())) {
+        if (dist >= goBackwardsLimit(player->ObtemRadiusColisao(), npc->ObtemRadiusColisao())) {
             goForward = true;
-            recuar = false;
+            goBackwards = false;
         }
 
         if (dist <= goForwardLimit(player->ObtemRadiusColisao(), npc->ObtemRadiusColisao()) && goForward) {
             goForward = false;
-            recuar = false;
+            goBackwards = false;
         }
 
-        if (!goForward && !recuar) {
+        if (!goForward && !goBackwards) {
             keyup('w', npc);
             keyup('s', npc);
 
@@ -253,16 +272,16 @@ void moveNPC(GLdouble timeDifference) {
                 keyup('w', npc);
                 mouse(GLUT_LEFT_BUTTON, GLUT_DOWN, Width / 2, npc, player);
                 punchingRight = true;
-                recuar = false;
+                goBackwards = false;
             }
 
-            if (punchingCount >= PUNCH_MAX) {
+            if (punchingCount >= punchMaxCount) {
                 mouse(GLUT_LEFT_BUTTON, GLUT_UP, Width / 2, npc, player);
                 punchingCount = 0;
                 punchingPosition = 0;
                 punchingLeft = false;
                 punchingRight = false;
-                recuar = true;
+                goBackwards = true;
             } else {
                 if (punchingPosition >= Width / 2) {
                     punchingLeft = true;
@@ -276,10 +295,10 @@ void moveNPC(GLdouble timeDifference) {
                 }
 
                 if (punchingRight) {
-                    punchingPosition += PUNCH_VELOCITY;
+                    punchingPosition += punchVelocity;
                     motion(Width / 2 + punchingPosition, Height / 2, npc, player);
                 } else if (punchingLeft) {
-                    punchingPosition -= PUNCH_VELOCITY;
+                    punchingPosition -= punchVelocity;
                     motion(Width / 2 + punchingPosition, Height / 2, npc, player);
 
                 }
@@ -400,6 +419,7 @@ int main(int argc, char *argv[]) {
     glutKeyboardUpFunc(keyup);
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
+    glutSpecialFunc(specialFunc);
 
     init();
 
