@@ -196,7 +196,11 @@ void renderScene(void) {
     GLfloat eyeY = _zoom * cos(toRad(_theta)) * cos((toRad(_phi))) + player->ObtemY();
     GLfloat eyeZ = _zoom * sin(toRad(_phi)) + player->ObtemRadiusColisao();
 
-    gluLookAt(0, 0, 250, player->ObtemX(), player->ObtemY(), player->ObtemRadiusColisao(), 0, 0, 1);
+    gluLookAt(eyeX, eyeY, eyeZ, player->ObtemX(), player->ObtemY(), player->ObtemRadiusColisao(), 0, 0, 1);
+
+    switch_light_mode();
+
+
     DrawAxes(50 );
     drawArenaFloor();
     player->Desenha();
@@ -204,7 +208,6 @@ void renderScene(void) {
 
     ImprimePlacar();
     declareWinner();
-    switch_light_mode();
     glutSwapBuffers(); // Desenha the new frame of the game.
 }
 
@@ -228,7 +231,7 @@ void keyPress(unsigned char key, int x, int y) {
             loadArenaScenario(arenaFile);
             break;
         case 'n':
-            show_ligth = !show_ligth;
+            nigth_mode = !nigth_mode;
             break;
 
         case 'c':
