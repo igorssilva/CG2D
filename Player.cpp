@@ -1,5 +1,6 @@
 #include "Player.h"
 #include <math.h>
+#include <iostream>
 #include "Transformations.h"
 
 using namespace std;
@@ -25,17 +26,18 @@ void cart() {
 
 void Player::DesenhaRect(GLint height, GLint width, GLfloat R, GLfloat G, GLfloat B) {
     /* Define cor dos vértices com os valores R, G e B variando de 0.0 a 1.0 */
-    glColor3f(R, G, B);
+    GLfloat color[] = {R, G, B, 1.0};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
     GLfloat x = 0;
-    GLfloat y = -((float) height / 2.0);
+    GLfloat yz = -((float) height / 2.0);
 
-    /* Desenhar um polígono (retângulo) */
-    glBegin(GL_POLYGON);
 
-    glVertex3f(x, y, 0.0);
-    glVertex3f(x + width, y, 0.0);
-    glVertex3f(x + width, y + height, 0.0);
-    glVertex3f(x, y + height, 0.0);
+    glPushMatrix();
+
+    glTranslatef(width/2,0,0);
+    glScalef(width,height,height);
+    glutSolidCube(1);
+    glPopMatrix();
 
     glEnd();
 }
@@ -43,7 +45,9 @@ void Player::DesenhaRect(GLint height, GLint width, GLfloat R, GLfloat G, GLfloa
 void Player::DesenhaCirc(GLint radius, GLfloat R, GLfloat G, GLfloat B, CircleMode mode) {
 
     /* Define cor dos vértices com os valores R, G e B variando de 0.0 a 1.0 */
-    glColor3f(R, G, B);
+
+    GLfloat color[] = {R, G, B, 1.0};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 
     // Quantidade de pontos no círculo
 
@@ -53,30 +57,34 @@ void Player::DesenhaCirc(GLint radius, GLfloat R, GLfloat G, GLfloat B, CircleMo
 
     switch (mode) {
         case CIRCLE_MODE_FILL:
-            glBegin(GL_POLYGON);
+            glutSolidSphere(radius, quantPoints, quantPoints);
             break;
         case CIRCLE_MODE_LINE:
             glBegin(GL_POINTS);
+            for (int i = 0; i < quantPoints; i++) {
+                float theta = 2.0f * M_PI * float(i) / float(quantPoints); // get the current angle
+
+                float x = radius * cosf(theta); // calculate the x component
+                float y = radius * sinf(theta); // calculate the y component
+                glVertex3f(x, y, 0.0);          // output vertex
+            }
+            glEnd();
             break;
     }
-    for (int i = 0; i < quantPoints; i++) {
-        float theta = 2.0f * M_PI * float(i) / float(quantPoints); // get the current angle
 
-        float x = radius * cosf(theta); // calculate the x component
-        float y = radius * sinf(theta); // calculate the y component
-        glVertex3f(x, y, 0.0);          // output vertex
-    }
-
-    glEnd();
 }
 
 void Player::DesenhaLuva(GLfloat radius, GLfloat R, GLfloat G, GLfloat B) {
     glPushMatrix();
 
-    glTranslatef(radius, 0, 0.0);
+    //(radius, 0, 0.0);
     this->DesenhaCirc(radius, R, G, B, CIRCLE_MODE_FILL);
 
     glPopMatrix();
+}
+
+void Player::DesenhaPerna(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
+
 }
 
 void Player::DesenhaBraco(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
@@ -87,15 +95,19 @@ void Player::DesenhaBraco(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
     // Draw the left arm (rotate around the center of the circle)
     glPushMatrix();
 
-    glTranslatef(0, radius, 0.0);
+    glTranslatef(0, radius, 0);
+    //DrawAxes(100);
     glRotatef(thetaL + ARM_POSITION, 0, 0, 1);
 
     this->DesenhaRect(height, width, 0.0, 0.0, 0.0);
 
+
     glTranslatef(width, 0, 0.0);
     glRotatef(-ARM_POSITION - thetaL, 0, 0, 1);
 
+    this->DesenhaLuva(radiusHand, 1.0, 0.0, 0.0);
     this->DesenhaRect(height, width, 0.0, 0.0, 0.0);
+
 
     // draw the glove
 
@@ -104,7 +116,7 @@ void Player::DesenhaBraco(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
 
     glPopMatrix();
 
-    // Draw the right arm (rotate around the center of the circle)
+   // Draw the right arm (rotate around the center of the circle)
     glPushMatrix();
     glTranslatef(0, -radius, 0.0);
     glRotatef(-thetaR - ARM_POSITION, 0, 0, 1);
@@ -113,6 +125,9 @@ void Player::DesenhaBraco(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
 
     glTranslatef(width, 0, 0.0);
     glRotatef(ARM_POSITION + thetaR, 0, 0, 1);
+
+    // draw elbow
+    this->DesenhaLuva(radiusHand, 1.0, 0.0, 0.0);
 
     this->DesenhaRect(height, width, 1.0, 1.0, 1.0);
 
@@ -129,7 +144,7 @@ void Player::DesenhaPlayer(GLfloat x, GLfloat y, GLfloat theta,
     glPushMatrix();
 
     // Move to the center of the circle
-    glTranslatef(x, y, 0.0);
+    glTranslatef(x, y, radius);
     glRotatef(theta, 0, 0, 1);
 
     // Draw both arms
@@ -365,6 +380,10 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
         }
     }
     if (this->keyStatus[(int) ('w')]) {
+        cout << "W" << endl;
+        cout << "posicao: " << this->gX << " " << this->gY << endl;
+        cout << "raio: " << this->gRadius << endl;
+        cout << "limites: " << width << " " << height << endl;
         if (this->keyStatus[(int) ('a')]) {
             this->Rotate(INC_ROTATE / 5 * timeDifference);
         }
@@ -373,6 +392,7 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
         }
         this->Move(INC_MOVE * timeDifference);
         if (!this->isInbound(width, height) || this->isColliding(anotherPlayer)) {
+            cout << "colidiu" << endl;
             this->Move(-INC_MOVE * timeDifference);
         }
     }
@@ -422,6 +442,7 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
             inc = dx / maxWidthPunch;
 
             this->RodaBracoDireito(inc * DEFAULT_ARM_ANGLE);
+            cout << "Roda braco direito: " << inc * DEFAULT_ARM_ANGLE << endl;
             this->RodaBracoEsquerdo(DEFAULT_ARM_ANGLE);
             if (this->isHitting(anotherPlayer) ) {
                 if (!anotherPlayer->hit && currentPosition > this->lastAttackPosition) {

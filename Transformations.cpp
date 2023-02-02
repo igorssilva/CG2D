@@ -91,3 +91,40 @@ float toRad(float degree) {
 float toDeg(float rad) {
     return rad * 180 / M_PI;
 }
+
+
+void DrawAxes(double size) {
+    GLfloat mat_red[] = {1.0, 0.0, 0.0, 1.0};
+
+
+    //x axis red
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_DIFFUSE,
+                 mat_red);
+    glScalef(size, size * 0.1, size * 0.1);
+    glTranslatef(0.5, 0, 0); // put in one end
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+    //y axis green
+    glPushMatrix();
+    GLfloat mat_green[] = {0.0, 1.0, 0.0, 1.0};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE,
+                 mat_green);
+    glRotatef(90, 0, 0, 1);
+    glScalef(size, size * 0.1, size * 0.1);
+    glTranslatef(0.5, 0, 0); // put in one end
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+    //z axis blue
+    glPushMatrix();
+    GLfloat mat_blue[] = {0.0, 0.0, 1.0, 1.0};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_blue);
+    glRotatef(-90, 0, 1, 0);
+    glScalef(size, size * 0.1, size * 0.1);
+    glTranslatef(0.5, 0, 0); // put in one end
+    glutSolidCube(1.0);
+    glClearColor(0, 0, 0, 0);
+    glPopMatrix();
+}

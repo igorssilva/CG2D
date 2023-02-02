@@ -142,6 +142,7 @@ public:
     }
 
 
+    void DesenhaPerna(GLfloat thetaR, GLfloat thetaL, GLfloat radius);
 };
 
 

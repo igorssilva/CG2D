@@ -3,6 +3,7 @@
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GL/glut.h>
 
 #define dimensao 3
 
@@ -19,5 +20,5 @@ void multiplyMatrixByVector(const GLfloat H[][dimensao], const GLfloat v[], GLfl
 void RotatePoint(GLfloat angle, GLfloat H[][dimensao]);
 
 void TranslatePoint(GLfloat dx, GLfloat dy, GLfloat H[][dimensao]);
-
+void DrawAxes(double size);
 #endif /* CG2D_TRANSFORMATIONS_H */
