@@ -36,75 +36,145 @@ bool goForward = true;
 bool goBackwards = false;
 int punchingPosition = 0;
 int punchingCount = 0;
-int punchVelocity = 1;
+int punchVelocity = 10;
 int punchMaxCount = 5;
 bool punchingRight = true;
 bool punchingLeft = false;
 
 
-float _zoom = 250.0f;
+float zoom = 700.0f;
 
-float _theta = 45.0f;
+float theta = 45.0f;
 
-float _phi = 90.0f;
-GLfloat light_position_x = 0;
-GLfloat light_position_y = 0;
-GLfloat light_position_z = 0;
-bool nigth_mode = true;
+float phi = 60.0f;
+
+
+bool nigth_mode = false;
 bool show_ligth = true;
 
+bool rotating = false;
+
+int last_x = 0;
+
+int last_y = 0;
+
+bool wrist_camera = false;
+
+bool eye_camera = true;
+
+bool top_camera = false;
+
+bool bot_active = false;
+bool moving_bot = false;
+
 void switch_light_mode() {
+    GLfloat light_position_x = 0;
+    GLfloat light_position_y = 0;
+    GLfloat light_position_z = 0;
     if (nigth_mode) {
         light_position_x = player->ObtemX();
         light_position_y = player->ObtemY();
-        light_position_z = player->ObtemRadiusColisao() *2;
+        light_position_z = player->ObtemRadiusColisao()* 4;
         GLfloat light_position[] = {light_position_x, light_position_y, light_position_z, 1};
+        GLfloat light_pdirection[] = {0, 0, -1, 1};
         glLightfv(GL_LIGHT1, GL_POSITION, light_position);
+        glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light_pdirection);
+        if (show_ligth) {
+            glDisable(GL_LIGHTING);
+            glPointSize(15);
+            glColor3f(1.0, 1.0, 0.0);
+            glBegin(GL_POINTS);
+            glVertex3f(light_position_x, light_position_y, light_position_z);
+            glEnd();
+            glEnable(GL_LIGHTING);
+        }
+        light_position_x = npc->ObtemX();
+        light_position_y = npc->ObtemY();
+        light_position_z = npc->ObtemRadiusColisao() * 4;
+        GLfloat light_position2[] = {light_position_x, light_position_y, light_position_z, 1};
+        GLfloat light_pdirection2[] = {0, 0, -1, 1};
+        glLightfv(GL_LIGHT2, GL_POSITION, light_position2);
+        glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_pdirection2);
+        if (show_ligth) {
+            glDisable(GL_LIGHTING);
+            glPointSize(15);
+            glColor3f(1.0, 1.0, 0.0);
+            glBegin(GL_POINTS);
+            glVertex3f(light_position_x, light_position_y, light_position_z);
+            glEnd();
+            glEnable(GL_LIGHTING);
+        }
+
         glDisable(GL_LIGHT0);
         glEnable(GL_LIGHT1);
+        glEnable(GL_LIGHT2);
     } else {
-        light_position_x = 0;
-        light_position_y = 0;
-        light_position_z = player->ObtemRadiusColisao() *2;
+        light_position_x = Width / 2;
+        light_position_y = Height / 2;
+        light_position_z = player->ObtemRadiusColisao() * 4;
         GLfloat light_position[] = {light_position_x, light_position_y, light_position_z, 1};
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+        if (show_ligth) {
+            glDisable(GL_LIGHTING);
+            glPointSize(15);
+            glColor3f(1.0, 1.0, 0.0);
+            glBegin(GL_POINTS);
+            glVertex3f(light_position_x, light_position_y, light_position_z);
+            glEnd();
+            glEnable(GL_LIGHTING);
+        }
         glDisable(GL_LIGHT1);
+        glDisable(GL_LIGHT2);
         glEnable(GL_LIGHT0);
     }
 
 
-    if (show_ligth) {
-        glDisable(GL_LIGHTING);
-        glPointSize(15);
-        glColor3f(1.0, 1.0, 0.0);
-        glBegin(GL_POINTS);
-        glVertex3f(light_position_x, light_position_y, light_position_z);
-        glEnd();
-        glEnable(GL_LIGHTING);
-    }
+
 
 }
-void drawArenaFloor(){
+
+void drawArenaFloor() {
     glPushMatrix();
 
 
     int numberOfSquares = 20;
 
     GLfloat mat_blue[] = {0.0, 0.0, 1.0, 1.0};
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_blue);
-    GLfloat x0 = 0;
-    GLfloat y0 = 0;
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_blue);
+    //glMaterialfv(GL_BACK, GL_DIFFUSE, mat_blue);
+    //glMaterialfv(GL_FRONT, GL_AMBIENT, mat_blue);
+
     GLfloat hdiv = Width / numberOfSquares;
     GLfloat vdiv = Height / numberOfSquares;
+//    for (int i = 0; i < numberOfSquares; i++) {
+//        for (int j = 0; j < numberOfSquares; j++) {
+//            GLfloat x1 = x0 + i * hdiv;
+//            GLfloat y1 = y0 + j * vdiv;
+//            GLfloat x2 = x0 + (i + 1) * hdiv;
+//            GLfloat y2 = y0 + (j + 1) * vdiv;
+//            glRectf(x1, y1, x2, y2);
+//        }
+//    }
+
     for (int i = 0; i < numberOfSquares; i++) {
         for (int j = 0; j < numberOfSquares; j++) {
-            GLfloat x1 = x0 + i * hdiv;
-            GLfloat y1 = y0 + j * vdiv;
-            GLfloat x2 = x0 + (i + 1) * hdiv;
-            GLfloat y2 = y0 + (j + 1) * vdiv;
-            glRectf(x1, y1, x2, y2);
+
+            // cout << "x1: " << i * hdiv << " y1: " << j * vdiv << endl;
+            glPushMatrix();
+
+            glTranslatef(i * hdiv, j * vdiv, 0);
+            glScalef(hdiv, vdiv, 1);
+            glutSolidCube(1);
+
+
+            glPopMatrix();
         }
     }
+    //exit(1);
+
+//    glTranslatef(Width/2, Height/2, 0);
+//    glScalef(Width, Height, 1);
+//    glutSolidCube(1);
 
 
     glPopMatrix();
@@ -115,15 +185,15 @@ void ImprimeTexto(const unsigned char *aText, void *aFont, GLfloat x, GLfloat y,
                   GLfloat G, GLfloat B) {
 
     // Define a posicao onde vai comecar a imprimir
-    glMatrixMode( GL_PROJECTION ) ;
-    glPushMatrix() ; // save
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix(); // save
     glLoadIdentity();// and clear
     gluOrtho2D(0.0, TAM_JANELA, 0.0, TAM_JANELA);
-    glMatrixMode( GL_MODELVIEW ) ;
-    glPushMatrix() ;
-    glLoadIdentity() ;
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
 
-    glDisable( GL_DEPTH_TEST ) ; // also disable the depth test so renders on top
+    glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
 
     glColor3f(R, G, B);
     glTranslatef(x + xOffset, y + yOffset, 0);
@@ -139,12 +209,12 @@ void ImprimeTexto(const unsigned char *aText, void *aFont, GLfloat x, GLfloat y,
         aText++;
     }
 
-    glEnable( GL_DEPTH_TEST ) ; // Turn depth testing back on
+    glEnable(GL_DEPTH_TEST); // Turn depth testing back on
 
-    glMatrixMode( GL_PROJECTION ) ;
-    glPopMatrix() ; // revert back to the matrix I had before.
-    glMatrixMode( GL_MODELVIEW ) ;
-    glPopMatrix() ;
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix(); // revert back to the matrix I had before.
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
 
 }
 
@@ -191,20 +261,40 @@ void renderScene(void) {
 
     //gluPerspective(50, 1, 1, 100000);
     //cout << "Player X: " << player->ObtemX() << endl;
-    _theta = player->ObtemTheta();
-    GLfloat eyeX = _zoom * sin(toRad(_theta)) * cos((toRad(_phi))) + player->ObtemX();
-    GLfloat eyeY = _zoom * cos(toRad(_theta)) * cos((toRad(_phi))) + player->ObtemY();
-    GLfloat eyeZ = _zoom * sin(toRad(_phi)) + player->ObtemRadiusColisao();
 
-    gluLookAt(eyeX, eyeY, eyeZ, player->ObtemX(), player->ObtemY(), player->ObtemRadiusColisao(), 0, 0, 1);
+    GLfloat eyeX = 0;
+    GLfloat eyeY = 0;
+    GLfloat eyeZ = 5;
+    GLfloat lookAtX = 0;
+    GLfloat lookAtY = 0;
+    GLfloat lookAtZ = -1;
+    if (eye_camera) {
+        theta = -player->ObtemTheta() - 90;
+        eyeX = player->ObtemX() + cos(toRad(theta)) * player->ObtemRadiusColisao();
+        eyeY = player->ObtemY() + sin(toRad(theta)) * player->ObtemRadiusColisao();
+        eyeZ = player->ObtemRadiusColisao() / 2;
+        lookAtX = cos(toRad(theta)) * player->ObtemRadiusColisao();
+        lookAtY = sin(toRad(theta)) * player->ObtemRadiusColisao();
+        lookAtZ = player->ObtemRadiusColisao() / 2;
+    } else if (top_camera) {
+        eyeX = zoom * sin(toRad(theta)) * cos((toRad(phi))) + player->ObtemX();
+        eyeY = zoom * cos(toRad(theta)) * cos((toRad(phi))) + player->ObtemY();
+        eyeZ = zoom * sin(toRad(phi)) + (player->ObtemRadiusColisao() / 2);
+        lookAtX = player->ObtemX();
+        lookAtY = player->ObtemY();
+        lookAtZ = 0;
+    }
+
+
+    gluLookAt(eyeX, eyeY, eyeZ, lookAtX, lookAtY, lookAtZ, 0, 0, 1);
 
     switch_light_mode();
 
 
-    DrawAxes(50 );
+    DrawAxes(50);
     drawArenaFloor();
     player->Desenha();
-    //npc->Desenha();
+    npc->Desenha();
 
     ImprimePlacar();
     declareWinner();
@@ -233,16 +323,42 @@ void keyPress(unsigned char key, int x, int y) {
         case 'n':
             nigth_mode = !nigth_mode;
             break;
-
+        case '1':
+            eye_camera = true;
+            top_camera = false;
+            wrist_camera = false;
+            break;
+        case '2':
+            wrist_camera = true;
+            eye_camera = false;
+            top_camera = false;
+            break;
+        case '3':
+            theta = -player->ObtemTheta() - 90;
+            top_camera = true;
+            eye_camera = false;
+            wrist_camera = false;
+            break;
         case 'c':
         case 'C':
             player->switchCollision();
             npc->switchCollision();
             break;
+        case 'b':
+            bot_active = !bot_active;
+        case 'B':
+            moving_bot = !moving_bot;
+            break;
         case '+':
+            zoom -= 5.5;
+            break;
+        case GLUT_UP:
             punchMaxCount++;
             break;
         case '-':
+            zoom += 5.5;
+            break;
+        case GLUT_DOWN:
             punchMaxCount--;
             break;
         case GLUT_KEY_PAGE_UP:
@@ -274,6 +390,16 @@ void mouse(int button, int state, int currentPosition, Player *p1, Player *p2) {
 void mouse(int button, int state, int x, int y) {
 
     mouse(button, state, x, player, npc);
+
+    if (button == GLUT_RIGHT_BUTTON) {
+        if (state == GLUT_DOWN) {
+            rotating = true;
+            last_x = x;
+            last_y = y;
+        } else {
+            rotating = false;
+        }
+    }
     glutPostRedisplay();
 }
 
@@ -291,6 +417,13 @@ void keyup(unsigned char key, int x, int y) {
 void motion(int x, int y, Player *p1, Player *p2) {
     if (!gameOver) {
         p1->Punch(maxWidthPunch, x, p2);
+    }
+
+    if (rotating) {
+        theta += (x - last_x) % 360;
+        phi += (y - last_y) % 60;
+        last_x = x;
+        last_y = y;
     }
 }
 
@@ -341,6 +474,13 @@ void moveNPC(GLdouble timeDifference) {
         GLfloat dist = npc->distance(player);
         GLfloat angle = angleToPlayer();
 
+        if (!moving_bot) {
+            goForward = false;
+            goBackwards = false;
+        } else {
+            goForward = true;
+            goBackwards = false;
+        }
 
         if (goBackwards && dist < goBackwardsLimit(player->ObtemRadiusColisao(), npc->ObtemRadiusColisao())) {
             keyPress('s', npc);
@@ -422,7 +562,10 @@ void idle(void) {
     previousTime = currentTime;
 
     move(timeDifference, player, npc);
-    //moveNPC(timeDifference);
+
+    if (bot_active) {
+        moveNPC(timeDifference);
+    }
 
 
     glutPostRedisplay();
@@ -489,15 +632,26 @@ void init(void) {
     glMatrixMode(GL_PROJECTION); // Select the projection matrix
 
     glEnable(GL_LIGHTING);
-    //
-    //
-    glEnable(GL_LIGHT0);
-    glEnable(GL_LIGHT1);
-    glEnable(GL_LIGHT2);
+
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_NORMALIZE);
 
-    //glEnable(GL_NORMALIZE);
+    GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+    GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular);
+    glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 30.0);
+
+
+    glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular);
+    glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 30.0);
+
 
     GLfloat mat_shininess[] = {50.0};
     glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
@@ -508,12 +662,6 @@ void init(void) {
     //Ajusta o tamanho da tela com a janela de visualizacao
     glViewport(0, 0, (GLsizei) TAM_JANELA, (GLsizei) TAM_JANELA);
     gluPerspective(45, 1, 10, 10000);
-    //glOrtho(-Width/2,                   // X coordinate of left edge
-    //        Width/2,               // X coordinate of right edge
-   //         -Height/2,                   // Y coordinate of bottom edge
-   //         Height/2,              // Y coordinate of top edge
-    //        -100,                // Z coordinate of the “near” plane
-    //        100);                // Z coordinate of the “far” plane
     glMatrixMode(GL_MODELVIEW);  // Select the projection matrix
     glLoadIdentity();
 }
@@ -533,7 +681,7 @@ int main(int argc, char *argv[]) {
     // Create the window.
     glutInitWindowSize(TAM_JANELA, TAM_JANELA);
     glutInitWindowPosition(150, 50);
-    glutCreateWindow("Jogo box 2D");
+    glutCreateWindow("Jogo box 3D");
 
     // Define callbacks.
     glutDisplayFunc(renderScene);

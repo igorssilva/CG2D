@@ -27,7 +27,7 @@ void cart() {
 void Player::DesenhaRect(GLint height, GLint width, GLfloat R, GLfloat G, GLfloat B) {
     /* Define cor dos vértices com os valores R, G e B variando de 0.0 a 1.0 */
     GLfloat color[] = {R, G, B, 1.0};
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
     GLfloat x = 0;
     GLfloat yz = -((float) height / 2.0);
 
@@ -47,7 +47,7 @@ void Player::DesenhaCirc(GLint radius, GLfloat R, GLfloat G, GLfloat B, CircleMo
     /* Define cor dos vértices com os valores R, G e B variando de 0.0 a 1.0 */
 
     GLfloat color[] = {R, G, B, 1.0};
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
 
     // Quantidade de pontos no círculo
 
@@ -161,6 +161,7 @@ void Player::DesenhaPlayer(GLfloat x, GLfloat y, GLfloat theta,
     glPopMatrix();
 
     // Draw body
+    DrawAxes(80);
     this->DesenhaCirc(radius, R, G, B, CIRCLE_MODE_FILL);
 
     // Draw collision circle
@@ -380,10 +381,7 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
         }
     }
     if (this->keyStatus[(int) ('w')]) {
-        cout << "W" << endl;
-        cout << "posicao: " << this->gX << " " << this->gY << endl;
-        cout << "raio: " << this->gRadius << endl;
-        cout << "limites: " << width << " " << height << endl;
+
         if (this->keyStatus[(int) ('a')]) {
             this->Rotate(INC_ROTATE / 5 * timeDifference);
         }
@@ -392,7 +390,7 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
         }
         this->Move(INC_MOVE * timeDifference);
         if (!this->isInbound(width, height) || this->isColliding(anotherPlayer)) {
-            cout << "colidiu" << endl;
+
             this->Move(-INC_MOVE * timeDifference);
         }
     }
