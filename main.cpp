@@ -253,6 +253,7 @@ void renderScene(void) {
     glLoadIdentity();
 
     glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
+    glDisable(GL_LIGHTING);
 
     glColor3f(1, 0, 0);
     glLineWidth(2);
@@ -277,14 +278,13 @@ void renderScene(void) {
 
         float x = 50 * cosf(theta) + player->ObtemX(); // calculate the x component
         float y = 50 * sinf(theta) + player->ObtemY(); // calculate the y component
-        cout << "x: " << x << " y: " << y << endl;
         glVertex3f(x, y, 10.0);          // output vertex
     }
     glEnd();
 
 
     glEnable(GL_DEPTH_TEST); // Turn depth testing back on
-
+    glEnable(GL_LIGHTING);
     glMatrixMode(GL_PROJECTION);
     glPopMatrix(); // revert back to the matrix I had before.
     glMatrixMode(GL_MODELVIEW);

@@ -5,7 +5,8 @@
 
 using namespace std;
 
-
+#define max_angle_leg 20
+#define min_angle_leg -203
 
 void cart() {
     // Draw the cartesian plane of the object
@@ -34,8 +35,8 @@ void Player::DesenhaRect(GLint height, GLint width, GLfloat R, GLfloat G, GLfloa
 
     glPushMatrix();
 
-    glTranslatef(width/2,0,0);
-    glScalef(width,height,height);
+    glTranslatef(width / 2, 0, 0);
+    glScalef(width, height, height);
     glutSolidCube(1);
     glPopMatrix();
 
@@ -89,18 +90,18 @@ void Player::DesenhaPerna(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
 
     GLfloat radiusHand = height;
     glPushMatrix();
-    glTranslatef(0, 0, width*2 + radiusHand);
+    glTranslatef(0, 0, width * 2 + radiusHand);
     // Draw the left arm (rotate around the center of the circle)
     glPushMatrix();
 
-    glTranslatef(0, height*1.2, 0);
-    glRotatef(70 - gThetaLL,0,1,0);
+    glTranslatef(0, height * 1.2, 0);
+    glRotatef(70 - gThetaLL, 0, 1, 0);
 
     this->DesenhaRect(height, width, 0.0, 0.0, 0.0);
 
 
     glTranslatef(width, 0, 0.0);
-    glRotatef(40+gThetaLL,0,1,0);
+    glRotatef(40 + gThetaLL, 0, 1, 0);
 
     this->DesenhaLuva(radiusHand, 1.0, 0.0, 0.0);
     this->DesenhaRect(height, width, 0.0, 0.0, 0.0);
@@ -115,13 +116,13 @@ void Player::DesenhaPerna(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
 
     // Draw the right arm (rotate around the center of the circle)
     glPushMatrix();
-    glTranslatef(0, -height*1.2, 0);
-    glRotatef(70 - gThetaRL,0,1,0);
+    glTranslatef(0, -height * 1.2, 0);
+    glRotatef(70 - gThetaRL, 0, 1, 0);
 
     this->DesenhaRect(height, width, 1.0, 1.0, 1.0);
 
     glTranslatef(width, 0, 0.0);
-    glRotatef(40 + gThetaRL,0,1,0);
+    glRotatef(40 + gThetaRL, 0, 1, 0);
 
     // draw elbow
     this->DesenhaLuva(radiusHand, 1.0, 0.0, 0.0);
@@ -165,7 +166,7 @@ void Player::DesenhaBraco(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
 
     glPopMatrix();
 
-   // Draw the right arm (rotate around the center of the circle)
+    // Draw the right arm (rotate around the center of the circle)
     glPushMatrix();
     glTranslatef(0, -radius, 0.0);
     glRotatef(-thetaR - ARM_POSITION, 0, 0, 1);
@@ -197,7 +198,7 @@ void Player::DesenhaPlayer(GLfloat x, GLfloat y, GLfloat theta,
     glRotatef(theta, 0, 0, 1);
     DesenhaPerna(0, 0, radius);
 
-    glTranslatef(0, 0, radius*4+radius/2);
+    glTranslatef(0, 0, radius * 4 + radius / 2);
     // Draw both arms
     this->DesenhaBraco(this->gThetaR, this->gThetaL, radius);
 
@@ -212,7 +213,7 @@ void Player::DesenhaPlayer(GLfloat x, GLfloat y, GLfloat theta,
     glPopMatrix();
 
     // Draw body
-   this->DesenhaCirc(radius, R, G, B, CIRCLE_MODE_FILL);
+    this->DesenhaCirc(radius, R, G, B, CIRCLE_MODE_FILL);
 
     // Draw collision circle
     if (this->collisionShow) {
@@ -378,6 +379,7 @@ void Player::DefineMove(unsigned char key) {
             this->attackStance = false;
             this->ResetaBracos();
             this->keyStatus[(int) ('a')] = 1; // Using keyStatus trick
+
             break;
         case 'd':
         case 'D':
@@ -391,12 +393,14 @@ void Player::DefineMove(unsigned char key) {
             this->attackStance = false;
             this->ResetaBracos();
             this->keyStatus[(int) ('w')] = 1; // Using keyStatus trick
+            this->right_leg_up = true;
             break;
         case 's':
         case 'S':
             this->attackStance = false;
             this->ResetaBracos();
             this->keyStatus[(int) ('s')] = 1; // Using keyStatus trick
+            this->right_leg_up = true;
             break;
 
     }
@@ -418,12 +422,44 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
         this->Rotate(-INC_ROTATE * timeDifference);
     }
     if (this->keyStatus[(int) ('s')]) {
+
+
         if (this->keyStatus[(int) ('a')]) {
             this->Rotate(INC_ROTATE / 5 * timeDifference);
         }
         if (this->keyStatus[(int) ('d')]) {
             this->Rotate(-INC_ROTATE / 5 * timeDifference);
         }
+
+
+        if (this->right_leg_up) {
+
+            this->gThetaRL += (int) (INC_ROTATE * timeDifference);
+            this->gThetaLL -= (int) (INC_ROTATE * timeDifference);
+
+            if (this->gThetaRL >= max_angle_leg) {
+                this->gThetaRL = max_angle_leg;
+                this->right_leg_up = false;
+            }
+            if (this->gThetaLL <= min_angle_leg) {
+                this->gThetaLL = min_angle_leg;
+                this->right_leg_up = false;
+            }
+
+        } else {
+            this->gThetaRL -= (int) (INC_ROTATE * timeDifference);
+            this->gThetaLL += (int) (INC_ROTATE * timeDifference);
+
+            if (this->gThetaRL <= min_angle_leg) {
+                this->gThetaRL = min_angle_leg;
+                this->right_leg_up = true;
+            }
+            if (this->gThetaLL >= max_angle_leg) {
+                this->gThetaLL = max_angle_leg;
+                this->right_leg_up = true;
+            }
+        }
+
         this->Move(-INC_MOVE * timeDifference);
 
         if (!this->isInbound(width, height) || this->isColliding(anotherPlayer)) {
@@ -432,17 +468,47 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
     }
     if (this->keyStatus[(int) ('w')]) {
 
+
         if (this->keyStatus[(int) ('a')]) {
             this->Rotate(INC_ROTATE / 5 * timeDifference);
         }
         if (this->keyStatus[(int) ('d')]) {
             this->Rotate(-INC_ROTATE / 5 * timeDifference);
         }
+
+        if (this->right_leg_up) {
+
+            this->gThetaRL += (int) (INC_ROTATE * timeDifference);
+            this->gThetaLL -= (int) (INC_ROTATE * timeDifference);
+
+            if (this->gThetaRL >= max_angle_leg) {
+                this->gThetaRL = max_angle_leg;
+                this->right_leg_up = false;
+            }
+            if (this->gThetaLL <= min_angle_leg) {
+                this->gThetaLL = min_angle_leg;
+                this->right_leg_up = false;
+            }
+
+        } else {
+            this->gThetaRL -= (int) (INC_ROTATE * timeDifference);
+            this->gThetaLL += (int) (INC_ROTATE * timeDifference);
+
+            if (this->gThetaRL <= min_angle_leg) {
+                this->gThetaRL = min_angle_leg;
+                this->right_leg_up = true;
+            }
+            if (this->gThetaLL >=  max_angle_leg) {
+                this->gThetaLL = max_angle_leg;
+                this->right_leg_up = true;
+            }
+        }
         this->Move(INC_MOVE * timeDifference);
         if (!this->isInbound(width, height) || this->isColliding(anotherPlayer)) {
 
             this->Move(-INC_MOVE * timeDifference);
         }
+
     }
 }
 
@@ -450,6 +516,11 @@ void Player::ResetKeyStatus() {
     // Initialize keyStatus
     for (int i = 0; i < 256; i++)
         this->keyStatus[i] = 0;
+
+    this->right_leg_up = false;
+    this->gThetaRL = 0;
+    this->gThetaLL = 0;
+
 }
 
 void Player::UpdateMove(unsigned char key) {
@@ -483,7 +554,7 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
 
         // Punching with right arm
         if (currentPosition > this->initialAttackPosition) {
-            GLfloat dx = (GLfloat)(this->initialAttackPosition - currentPosition);
+            GLfloat dx = (GLfloat) (this->initialAttackPosition - currentPosition);
             if (dx < -maxWidthPunch) {
                 dx = -maxWidthPunch;
             }
@@ -492,7 +563,7 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
             this->RodaBracoDireito(inc * DEFAULT_ARM_ANGLE);
             cout << "Roda braco direito: " << inc * DEFAULT_ARM_ANGLE << endl;
             this->RodaBracoEsquerdo(DEFAULT_ARM_ANGLE);
-            if (this->isHitting(anotherPlayer) ) {
+            if (this->isHitting(anotherPlayer)) {
                 if (!anotherPlayer->hit && currentPosition > this->lastAttackPosition) {
                     anotherPlayer->hit = true;
                     anotherPlayer->TakeDamage(1);
@@ -502,7 +573,7 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
             }
         } else {// Punching with left arm
             if (currentPosition < this->initialAttackPosition) {
-                GLfloat dx = (GLfloat)(currentPosition - this->initialAttackPosition);
+                GLfloat dx = (GLfloat) (currentPosition - this->initialAttackPosition);
                 if (dx < -maxWidthPunch) {
                     dx = -maxWidthPunch;
                 }
@@ -510,7 +581,7 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
                 this->RodaBracoEsquerdo(inc * DEFAULT_ARM_ANGLE);
                 this->RodaBracoDireito(DEFAULT_ARM_ANGLE);
 
-                if (this->isHitting(anotherPlayer) ) {
+                if (this->isHitting(anotherPlayer)) {
                     if (!anotherPlayer->hit && currentPosition < this->lastAttackPosition) {
                         anotherPlayer->hit = true;
                         anotherPlayer->TakeDamage(1);
@@ -524,18 +595,15 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
         this->lastAttackPosition = currentPosition;
 
 
-
-
-
     }
 }
 
 
-float Player::center(){
-    return this->gRadius*4;
+float Player::center() {
+    return this->gRadius * 4 + this->gRadius / 2;
 }
 
 
-float Player::height(){
-    return this->gRadius*8;
+float Player::height() {
+    return this->gRadius * 8;
 }

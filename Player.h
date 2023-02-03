@@ -30,6 +30,8 @@ class Player {
     int keyStatus[256];
     bool collisionShow;
 
+    bool right_leg_up = true;
+
 private:
     enum CircleMode {
         CIRCLE_MODE_FILL,
