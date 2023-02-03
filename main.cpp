@@ -130,9 +130,15 @@ void switch_light_mode() {
 
 
 }
+GLfloat CurrentPosition(GLfloat first, int i, GLfloat size) {
+    return first + i * size;
+}
 
-void drawArenaFloor() {
-    glPushMatrix();
+GLfloat NextPosition(int i, GLfloat first, GLfloat size) {
+    return first + (i + 1) * size;
+}
+
+void drawArena() {
 
 
     int numberOfSquares = 20;
@@ -159,8 +165,82 @@ void drawArenaFloor() {
         }
     }
 
+    numberOfSquares = 1;
+    GLfloat x_size = Width / numberOfSquares;
+    GLfloat y_size = Height / numberOfSquares;
+    GLfloat z_size = player->height()*2 / numberOfSquares;
 
-    glPopMatrix();
+
+    GLfloat x0 = 0;
+    GLfloat y0 = 0;
+    GLfloat z0 = 0;
+
+    GLfloat x1 =  Width;
+    GLfloat y1 =  Height;
+    GLfloat z1 =  player->height()*2;
+
+
+
+/* Ceiling */
+    for (int i = 0; i < numberOfSquares; i++) {
+
+        glBegin(GL_QUADS);
+        glVertex3f(CurrentPosition(x0, i, x_size), CurrentPosition(y0, i, y_size), z1);
+        glVertex3f(NextPosition(x0, i, x_size), CurrentPosition(y0, i, y_size), z1);
+        glVertex3f(NextPosition(x0, i, x_size), NextPosition(y0, i, y_size), z1);
+        glVertex3f(CurrentPosition(x0, i, x_size), NextPosition(y0, i, y_size), z1);
+        glEnd();
+    }
+
+/* Walls */
+// Wall along X and Y = 0
+
+    for (int i = 0; i < numberOfSquares; i++) {
+
+        glBegin(GL_QUADS);
+        glVertex3f(CurrentPosition(x0, i, x_size), y0, CurrentPosition(z0, i, z_size));
+        glVertex3f(NextPosition(x0, i, x_size), y0, CurrentPosition(z0, i, z_size));
+        glVertex3f(NextPosition(x0, i, x_size), y0, NextPosition(z0, i, z_size));
+        glVertex3f(CurrentPosition(x0, i, x_size), y0, NextPosition(z0, i, z_size));
+        glEnd();
+    }
+
+
+// Wall along Y and X = x1
+
+    for (int i = 0; i < numberOfSquares; i++) {
+
+        glBegin(GL_QUADS);
+        glVertex3f(x1, CurrentPosition(y0, i, y_size), CurrentPosition(z0, i, z_size));
+        glVertex3f(x1, NextPosition(y0, i, y_size), CurrentPosition(z0, i, z_size));
+        glVertex3f(x1, NextPosition(y0, i, y_size), NextPosition(z0, i, z_size));
+        glVertex3f(x1, CurrentPosition(y0, i, y_size), NextPosition(z0, i, z_size));
+        glEnd();
+    }
+
+    // Wall along X and Y = y1
+
+    for (int i = 0; i < numberOfSquares; i++) {
+
+        glBegin(GL_QUADS);
+        glVertex3f(CurrentPosition(x0, i, x_size), y1, CurrentPosition(z0, i, z_size));
+        glVertex3f(NextPosition(x0, i, x_size), y1, CurrentPosition(z0, i, z_size));
+        glVertex3f(NextPosition(x0, i, x_size), y1, NextPosition(z0, i, z_size));
+        glVertex3f(CurrentPosition(x0, i, x_size), y1, NextPosition(z0, i, z_size));
+        glEnd();
+    }
+
+    // Wall along Y and X = 0
+
+    for (int i = 0; i < numberOfSquares; i++) {
+
+        glBegin(GL_QUADS);
+        glVertex3f(x0, CurrentPosition(y0, i, y_size), CurrentPosition(z0, i, z_size));
+        glVertex3f(x0, NextPosition(y0, i, y_size), CurrentPosition(z0, i, z_size));
+        glVertex3f(x0, NextPosition(y0, i, y_size), NextPosition(z0, i, z_size));
+        glVertex3f(x0, CurrentPosition(y0, i, y_size), NextPosition(z0, i, z_size));
+        glEnd();
+    }
 }
 
 void ImprimeTexto(const unsigned char *aText, void *aFont, GLfloat x, GLfloat y, GLfloat xOffset, GLfloat yOffset,
@@ -242,57 +322,9 @@ void renderScene(void) {
     // Clear the screen.
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix(); // save
-    glLoadIdentity();// and clear
-    glOrtho(0, TAM_JANELA, 0, TAM_JANELA, -1, 100);
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-
-    glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
-    glDisable(GL_LIGHTING);
-
-    glColor3f(1, 0, 0);
-    glLineWidth(2);
-    glBegin(GL_QUADS);
-    glVertex3f(TAM_JANELA*0.5 - 20, TAM_JANELA*0.5- 20, 10);
-    glVertex3f(TAM_JANELA- 20, TAM_JANELA*0.5- 20, 10);
-    glVertex3f(TAM_JANELA- 20, TAM_JANELA- 20, 10);
-    glVertex3f(TAM_JANELA*0.5- 20, TAM_JANELA- 20, 10);
-    glEnd();
-
-
-    // Quantidade de pontos no círculo
-
-    int quantPoints = 360 / 20;
-
-    glPointSize(3); // Tamanho dos pontos
-
-    glColor3f(0, 1, 0);
-    glBegin(GL_POLYGON);
-    for (int i = 0; i < quantPoints; i++) {
-        float theta = 2.0f * M_PI * float(i) / float(quantPoints); // get the current angle
-
-        float x = 50 * cosf(theta) + player->ObtemX(); // calculate the x component
-        float y = 50 * sinf(theta) + player->ObtemY(); // calculate the y component
-        glVertex3f(x, y, 10.0);          // output vertex
-    }
-    glEnd();
-
-
-    glEnable(GL_DEPTH_TEST); // Turn depth testing back on
-    glEnable(GL_LIGHTING);
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix(); // revert back to the matrix I had before.
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
+    //
     GLfloat eyeX = 0;
     GLfloat eyeY = 0;
     GLfloat eyeZ = 5;
@@ -321,13 +353,71 @@ void renderScene(void) {
 
     switch_light_mode();
 
-    drawArenaFloor();
+    drawArena();
     player->Desenha();
     npc->Desenha();
 
     ImprimePlacar();
     declareWinner();
+    glScalef(0.1, 0.1, 0.1);
 
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix(); // save
+    glLoadIdentity();// and clear
+    glOrtho(0, TAM_JANELA, 0, TAM_JANELA, -1, 100);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
+    glDisable(GL_LIGHTING);
+
+    // Draw the minimap
+    glColor3f(1, 0, 0);
+    glLineWidth(2);
+    glBegin(GL_QUADS);
+    glVertex3f(TAM_JANELA*0.5 - 20, TAM_JANELA*0.5- 20, 10);
+    glVertex3f(TAM_JANELA- 20, TAM_JANELA*0.5- 20, 10);
+    glVertex3f(TAM_JANELA- 20, TAM_JANELA- 20, 10);
+    glVertex3f(TAM_JANELA*0.5- 20, TAM_JANELA- 20, 10);
+    glEnd();
+
+
+    // Quantidade de pontos no círculo
+
+    int quantPoints = 360 / 20;
+
+    glPointSize(3); // Tamanho dos pontos
+
+    glColor3f(0, 1, 0);
+
+    glPushMatrix();
+
+    GLfloat x0 = player->ObtemX()/Width * TAM_JANELA*0.5 - 20;
+    GLfloat y0 = player->ObtemY()/Height * TAM_JANELA*0.5 - 20;
+    // translate to the player position proportionally to the minimap
+    glTranslatef(x0, y0, 0);
+
+    glBegin(GL_LINES);
+    for (int i = 0; i < quantPoints; i++) {
+        float theta = 2.0f * M_PI * float(i) / float(quantPoints); // get the current angle
+
+        float x = 50 * cosf(theta); // calculate the x component
+        float y = 50 * sinf(theta); // calculate the y component
+        glVertex3f(x, y, 10.0);          // output vertex
+    }
+
+    glEnd();
+    glPopMatrix();
+
+
+    glEnable(GL_DEPTH_TEST); // Turn depth testing back on
+    glEnable(GL_LIGHTING);
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix(); // revert back to the matrix I had before.
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
 
 
 
