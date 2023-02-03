@@ -17,6 +17,8 @@ class Player {
     GLfloat gTheta;
     GLfloat gThetaL;
     GLfloat gThetaR;
+    GLfloat gThetaLL;
+    GLfloat gThetaRL;
     GLfloat gRadius;
     GLfloat playerColor[3];
     int hp;
@@ -79,6 +81,8 @@ public:
         this->gRadius = radius;
         this->gThetaL = DEFAULT_ARM_ANGLE;
         this->gThetaR = DEFAULT_ARM_ANGLE;
+        this->gThetaLL = 0;
+        this->gThetaRL = 0;
         this->playerColor[0] = R;
         this->playerColor[1] = G;
         this->playerColor[2] = B;
@@ -143,6 +147,10 @@ public:
 
 
     void DesenhaPerna(GLfloat thetaR, GLfloat thetaL, GLfloat radius);
+
+    float center();
+
+    float height();
 };
 
 

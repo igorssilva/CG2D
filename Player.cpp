@@ -84,7 +84,57 @@ void Player::DesenhaLuva(GLfloat radius, GLfloat R, GLfloat G, GLfloat B) {
 }
 
 void Player::DesenhaPerna(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
+    GLfloat width = radius * 2;
+    GLfloat height = width / 5;
 
+    GLfloat radiusHand = height;
+    glPushMatrix();
+    glTranslatef(0, 0, width*2 + radiusHand);
+    // Draw the left arm (rotate around the center of the circle)
+    glPushMatrix();
+
+    glTranslatef(0, height*1.2, 0);
+    glRotatef(70 - gThetaLL,0,1,0);
+
+    this->DesenhaRect(height, width, 0.0, 0.0, 0.0);
+
+
+    glTranslatef(width, 0, 0.0);
+    glRotatef(40+gThetaLL,0,1,0);
+
+    this->DesenhaLuva(radiusHand, 1.0, 0.0, 0.0);
+    this->DesenhaRect(height, width, 0.0, 0.0, 0.0);
+
+
+    // draw the glove
+
+    glTranslatef(width, 0, 0.0);
+    this->DesenhaLuva(radiusHand, 1.0, 0.0, 0.0);
+
+    glPopMatrix();
+
+    // Draw the right arm (rotate around the center of the circle)
+    glPushMatrix();
+    glTranslatef(0, -height*1.2, 0);
+    glRotatef(70 - gThetaRL,0,1,0);
+
+    this->DesenhaRect(height, width, 1.0, 1.0, 1.0);
+
+    glTranslatef(width, 0, 0.0);
+    glRotatef(40 + gThetaRL,0,1,0);
+
+    // draw elbow
+    this->DesenhaLuva(radiusHand, 1.0, 0.0, 0.0);
+
+    this->DesenhaRect(height, width, 1.0, 1.0, 1.0);
+
+    // draw the glove
+    glTranslatef(width, 0, 0.0);
+    this->DesenhaLuva(radiusHand, 1.0, 0.0, 0.0);
+
+    glPopMatrix();
+
+    glPopMatrix();
 }
 
 void Player::DesenhaBraco(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
@@ -96,7 +146,6 @@ void Player::DesenhaBraco(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
     glPushMatrix();
 
     glTranslatef(0, radius, 0);
-    //DrawAxes(100);
     glRotatef(thetaL + ARM_POSITION, 0, 0, 1);
 
     this->DesenhaRect(height, width, 0.0, 0.0, 0.0);
@@ -144,9 +193,11 @@ void Player::DesenhaPlayer(GLfloat x, GLfloat y, GLfloat theta,
     glPushMatrix();
 
     // Move to the center of the circle
-    glTranslatef(x, y, radius);
+    glTranslatef(x, y, 0);
     glRotatef(theta, 0, 0, 1);
+    DesenhaPerna(0, 0, radius);
 
+    glTranslatef(0, 0, radius*4+radius/2);
     // Draw both arms
     this->DesenhaBraco(this->gThetaR, this->gThetaL, radius);
 
@@ -161,8 +212,7 @@ void Player::DesenhaPlayer(GLfloat x, GLfloat y, GLfloat theta,
     glPopMatrix();
 
     // Draw body
-    DrawAxes(80);
-    this->DesenhaCirc(radius, R, G, B, CIRCLE_MODE_FILL);
+   this->DesenhaCirc(radius, R, G, B, CIRCLE_MODE_FILL);
 
     // Draw collision circle
     if (this->collisionShow) {
@@ -478,4 +528,14 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
 
 
     }
+}
+
+
+float Player::center(){
+    return this->gRadius*4;
+}
+
+
+float Player::height(){
+    return this->gRadius*8;
 }

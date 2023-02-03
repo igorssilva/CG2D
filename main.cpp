@@ -42,11 +42,11 @@ bool punchingRight = true;
 bool punchingLeft = false;
 
 
-float zoom = 700.0f;
+float zoom = 450.0f;
 
 float theta = 45.0f;
 
-float phi = 60.0f;
+float phi = 30.0f;
 
 
 bool nigth_mode = false;
@@ -74,7 +74,7 @@ void switch_light_mode() {
     if (nigth_mode) {
         light_position_x = player->ObtemX();
         light_position_y = player->ObtemY();
-        light_position_z = player->ObtemRadiusColisao()* 4;
+        light_position_z = player->height() * 2;
         GLfloat light_position[] = {light_position_x, light_position_y, light_position_z, 1};
         GLfloat light_pdirection[] = {0, 0, -1, 1};
         glLightfv(GL_LIGHT1, GL_POSITION, light_position);
@@ -90,7 +90,7 @@ void switch_light_mode() {
         }
         light_position_x = npc->ObtemX();
         light_position_y = npc->ObtemY();
-        light_position_z = npc->ObtemRadiusColisao() * 4;
+        light_position_z = npc->height() * 2;
         GLfloat light_position2[] = {light_position_x, light_position_y, light_position_z, 1};
         GLfloat light_pdirection2[] = {0, 0, -1, 1};
         glLightfv(GL_LIGHT2, GL_POSITION, light_position2);
@@ -129,8 +129,6 @@ void switch_light_mode() {
     }
 
 
-
-
 }
 
 void drawArenaFloor() {
@@ -141,25 +139,15 @@ void drawArenaFloor() {
 
     GLfloat mat_blue[] = {0.0, 0.0, 1.0, 1.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_blue);
-    //glMaterialfv(GL_BACK, GL_DIFFUSE, mat_blue);
-    //glMaterialfv(GL_FRONT, GL_AMBIENT, mat_blue);
+
 
     GLfloat hdiv = Width / numberOfSquares;
     GLfloat vdiv = Height / numberOfSquares;
-//    for (int i = 0; i < numberOfSquares; i++) {
-//        for (int j = 0; j < numberOfSquares; j++) {
-//            GLfloat x1 = x0 + i * hdiv;
-//            GLfloat y1 = y0 + j * vdiv;
-//            GLfloat x2 = x0 + (i + 1) * hdiv;
-//            GLfloat y2 = y0 + (j + 1) * vdiv;
-//            glRectf(x1, y1, x2, y2);
-//        }
-//    }
+
 
     for (int i = 0; i < numberOfSquares; i++) {
         for (int j = 0; j < numberOfSquares; j++) {
 
-            // cout << "x1: " << i * hdiv << " y1: " << j * vdiv << endl;
             glPushMatrix();
 
             glTranslatef(i * hdiv, j * vdiv, 0);
@@ -170,11 +158,6 @@ void drawArenaFloor() {
             glPopMatrix();
         }
     }
-    //exit(1);
-
-//    glTranslatef(Width/2, Height/2, 0);
-//    glScalef(Width, Height, 1);
-//    glutSolidCube(1);
 
 
     glPopMatrix();
@@ -194,6 +177,7 @@ void ImprimeTexto(const unsigned char *aText, void *aFont, GLfloat x, GLfloat y,
     glLoadIdentity();
 
     glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
+    glDisable(GL_LIGHTING);
 
     glColor3f(R, G, B);
     glTranslatef(x + xOffset, y + yOffset, 0);
@@ -209,6 +193,7 @@ void ImprimeTexto(const unsigned char *aText, void *aFont, GLfloat x, GLfloat y,
         aText++;
     }
 
+    glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST); // Turn depth testing back on
 
     glMatrixMode(GL_PROJECTION);
@@ -255,12 +240,58 @@ void ImprimePlacar() {
 
 void renderScene(void) {
     // Clear the screen.
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    //gluPerspective(50, 1, 1, 100000);
-    //cout << "Player X: " << player->ObtemX() << endl;
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix(); // save
+    glLoadIdentity();// and clear
+    glOrtho(0, TAM_JANELA, 0, TAM_JANELA, -1, 100);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
+
+    glColor3f(1, 0, 0);
+    glLineWidth(2);
+    glBegin(GL_QUADS);
+    glVertex3f(TAM_JANELA*0.5 - 20, TAM_JANELA*0.5- 20, 10);
+    glVertex3f(TAM_JANELA- 20, TAM_JANELA*0.5- 20, 10);
+    glVertex3f(TAM_JANELA- 20, TAM_JANELA- 20, 10);
+    glVertex3f(TAM_JANELA*0.5- 20, TAM_JANELA- 20, 10);
+    glEnd();
+
+
+    // Quantidade de pontos no círculo
+
+    int quantPoints = 360 / 20;
+
+    glPointSize(3); // Tamanho dos pontos
+
+    glColor3f(0, 1, 0);
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < quantPoints; i++) {
+        float theta = 2.0f * M_PI * float(i) / float(quantPoints); // get the current angle
+
+        float x = 50 * cosf(theta) + player->ObtemX(); // calculate the x component
+        float y = 50 * sinf(theta) + player->ObtemY(); // calculate the y component
+        cout << "x: " << x << " y: " << y << endl;
+        glVertex3f(x, y, 10.0);          // output vertex
+    }
+    glEnd();
+
+
+    glEnable(GL_DEPTH_TEST); // Turn depth testing back on
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix(); // revert back to the matrix I had before.
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
     GLfloat eyeX = 0;
     GLfloat eyeY = 0;
@@ -272,17 +303,17 @@ void renderScene(void) {
         theta = -player->ObtemTheta() - 90;
         eyeX = player->ObtemX() + cos(toRad(theta)) * player->ObtemRadiusColisao();
         eyeY = player->ObtemY() + sin(toRad(theta)) * player->ObtemRadiusColisao();
-        eyeZ = player->ObtemRadiusColisao() / 2;
+        eyeZ = player->center();
         lookAtX = cos(toRad(theta)) * player->ObtemRadiusColisao();
         lookAtY = sin(toRad(theta)) * player->ObtemRadiusColisao();
-        lookAtZ = player->ObtemRadiusColisao() / 2;
+        lookAtZ = player->center();
     } else if (top_camera) {
         eyeX = zoom * sin(toRad(theta)) * cos((toRad(phi))) + player->ObtemX();
         eyeY = zoom * cos(toRad(theta)) * cos((toRad(phi))) + player->ObtemY();
-        eyeZ = zoom * sin(toRad(phi)) + (player->ObtemRadiusColisao() / 2);
+        eyeZ = zoom * sin(toRad(phi)) + player->center();
         lookAtX = player->ObtemX();
         lookAtY = player->ObtemY();
-        lookAtZ = 0;
+        lookAtZ = player->center();
     }
 
 
@@ -290,14 +321,17 @@ void renderScene(void) {
 
     switch_light_mode();
 
-
-    DrawAxes(50);
     drawArenaFloor();
     player->Desenha();
     npc->Desenha();
 
     ImprimePlacar();
     declareWinner();
+
+
+
+
+
     glutSwapBuffers(); // Desenha the new frame of the game.
 }
 
@@ -350,13 +384,13 @@ void keyPress(unsigned char key, int x, int y) {
             moving_bot = !moving_bot;
             break;
         case '+':
-            zoom -= 5.5;
+            zoom -= 50.5;
             break;
         case GLUT_UP:
             punchMaxCount++;
             break;
         case '-':
-            zoom += 5.5;
+            zoom += 50.5;
             break;
         case GLUT_DOWN:
             punchMaxCount--;
@@ -420,8 +454,18 @@ void motion(int x, int y, Player *p1, Player *p2) {
     }
 
     if (rotating) {
-        theta += (x - last_x) % 360;
-        phi += (y - last_y) % 60;
+        theta += (x - last_x);
+        if (theta > 360) {
+            theta -= 360;
+        } else if (theta < 0) {
+            theta += 360;
+        }
+        phi += (y - last_y);
+        if (phi > 60) {
+            phi = 60;
+        } else if (phi < -60) {
+            phi = -60;
+        }
         last_x = x;
         last_y = y;
     }
@@ -637,20 +681,20 @@ void init(void) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_NORMALIZE);
 
-    GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
-    GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
-    GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_ambient[] = {0.0, 0.0, 0.0, 1.0};
+    GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};
+    GLfloat light_specular[] = {1.0, 1.0, 1.0, 1.0};
 
     glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular);
-    glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 30.0);
+    glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 15.0);
 
 
     glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular);
-    glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 30.0);
+    glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 15.0);
 
 
     GLfloat mat_shininess[] = {50.0};
