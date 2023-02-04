@@ -170,7 +170,7 @@ GLfloat NextPosition(GLfloat first, int current_index, GLfloat size) {
 void drawArena() {
 
 
-    int numberOfSquares = 100;
+    int numberOfSquares = 50;
 
     GLfloat mat_blue[] = {1.0, 1.0, 1.0, 1.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_blue);

@@ -6,7 +6,7 @@
 using namespace std;
 
 #define max_angle_leg 20
-#define min_angle_leg -203
+#define min_angle_leg -20
 
 void cart() {
     // Draw the cartesian plane of the object
@@ -279,7 +279,7 @@ void Player::calculaPosicaoLuvaDireita(GLfloat &xLuvaDireita, GLfloat &yLuvaDire
     TranslatePoint(width, 0, H);
 
     // Rotate forearm to right angle
-    RotatePoint(toRad(ARM_POSITION + this->gThetaR), H);
+    RotatePoint(toRad(ARM_POSITION + this->gThetaR- (this->gThetaR*0.7)), H);
 
     // Move forearm to edge of arm
     TranslatePoint(width, 0, H);
@@ -319,7 +319,7 @@ void Player::calculaPosicaoLuvaEsquerda(GLfloat &xLuvaEsquerda, GLfloat &yLuvaEs
     TranslatePoint(width, 0, H);
 
     // Rotate forearm to right angle
-    RotatePoint(toRad(-ARM_POSITION - this->gThetaL), H);
+    RotatePoint(toRad(-ARM_POSITION - this->gThetaL+ (this->gThetaL*0.7)), H);
 
     // Move forearm to edge of arm
     TranslatePoint(width, 0, H);
@@ -335,6 +335,7 @@ void Player::calculaPosicaoLuvaEsquerda(GLfloat &xLuvaEsquerda, GLfloat &yLuvaEs
 
     // Move to the center of the circle
     TranslatePoint(this->gX, this->gY, H);
+
 
     GLfloat v_l[dimensao];
 
@@ -476,7 +477,7 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
             this->Rotate(-INC_ROTATE / 5 * timeDifference);
         }
 
-      /*  if (this->right_leg_up) {
+        if (this->right_leg_up) {
 
             this->gThetaRL += (int) (INC_ROTATE * timeDifference);
             this->gThetaLL -= (int) (INC_ROTATE * timeDifference);
@@ -502,7 +503,7 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
                 this->gThetaLL = max_angle_leg;
                 this->right_leg_up = true;
             }
-        }*/
+        }
         this->Move(INC_MOVE * timeDifference);
         if (!this->isInbound(width, height) || this->isColliding(anotherPlayer)) {
 
