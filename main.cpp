@@ -35,6 +35,10 @@ void drawElements();
 
 void opponentView();
 
+void setCamMode();
+
+void playerView();
+
 void *font = GLUT_BITMAP_TIMES_ROMAN_24;
 
 // Configurações iniciais de movimento do NPC
@@ -66,9 +70,9 @@ int last_y = 0;
 
 bool wrist_camera = false;
 
-bool eye_camera = false;
+bool eye_camera = true;
 
-bool top_camera = true;
+bool top_camera = false;
 
 bool bot_active = false;
 bool moving_bot = false;
@@ -341,19 +345,32 @@ void renderScene(void) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    playerView();
+
+    ImprimePlacar();
+    declareWinner();
+    DrawMiniMap();
+
+    opponentView();
+
+
+    glutSwapBuffers(); // Desenha the new frame of the game.
+}
+
+void playerView() {
     glMatrixMode(GL_PROJECTION);
     glViewport(0, 0, (GLsizei) TAM_JANELA, (GLsizei) TAM_JANELA);
     glMatrixMode(GL_MODELVIEW);  // Select the projection matrix
     glLoadIdentity();
-    //
 
 
+    setCamMode();
 
+    drawElements();
+}
 
-
+void setCamMode() {
     if (eye_camera) {
-
-
 
         // Girar 90 graus no eixo X para que o eixo Z fique para cima
         glRotatef(-90, 1, 0, 0);
@@ -376,18 +393,6 @@ void renderScene(void) {
         GLfloat lookAtZ = player->center();
         gluLookAt(eyeX, eyeY, eyeZ, lookAtX, lookAtY, lookAtZ, 0, 0, 1);
     }
-
-    drawElements();
-
-    ImprimePlacar();
-    declareWinner();
-    DrawMiniMap();
-
-
-    opponentView();
-
-
-    glutSwapBuffers(); // Desenha the new frame of the game.
 }
 
 void opponentView() {
