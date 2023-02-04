@@ -60,9 +60,9 @@ int last_y = 0;
 
 bool wrist_camera = false;
 
-bool eye_camera = true;
+bool eye_camera = false;
 
-bool top_camera = false;
+bool top_camera = true;
 
 bool bot_active = false;
 bool moving_bot = false;
@@ -130,50 +130,37 @@ void switch_light_mode() {
 
 
 }
-GLfloat CurrentPosition(GLfloat first, int i, GLfloat size) {
-    return first + i * size;
+
+GLfloat CurrentPosition(GLfloat first, int current_index, GLfloat size) {
+    return first + current_index * size;
 }
 
-GLfloat NextPosition(int i, GLfloat first, GLfloat size) {
-    return first + (i + 1) * size;
+GLfloat NextPosition(GLfloat first, int current_index, GLfloat size) {
+    return first + (current_index + 1) * size;
 }
 
 void drawArena() {
 
 
-    int numberOfSquares = 200;
+    int numberOfSquares = 100;
 
     GLfloat mat_blue[] = {0.0, 0.0, 1.0, 1.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_blue);
-
-
-    GLfloat hdiv = Width / numberOfSquares;
-    GLfloat vdiv = Height / numberOfSquares;
-
-//    glPushMatrix();
-//
-//
-//    glTranslatef(Width/2, Height/2, 0);
-//    glScalef(Width, Height, 1);
-//    DrawAxes(1);
-//    glutSolidCube(1);
-//
-//    glPopMatrix();
-//    DrawAxes(10);
 
     GLfloat x0 = 0;
     GLfloat y0 = 0;
     GLfloat z0 = 0;
 
-    GLfloat x1 =  Width;
-    GLfloat y1 =  Height;
-    GLfloat z1 =  player->height()*2;
+    GLfloat x1 = Width;
+    GLfloat y1 = Height;
+    GLfloat z1 = player->height() * 2;
 
     GLfloat x_size = Width / numberOfSquares;
     GLfloat y_size = Height / numberOfSquares;
-    GLfloat z_size = player->height()*2 / numberOfSquares;
+    GLfloat z_size = player->height() * 2 / numberOfSquares;
     for (int i = 0; i < numberOfSquares; i++) {
         for (int j = 0; j < numberOfSquares; j++) {
+
 
             glNormal3f(0, 0, 1);
             glBegin(GL_QUADS);
@@ -182,75 +169,89 @@ void drawArena() {
             glVertex3f(NextPosition(x0, i, x_size), NextPosition(y0, j, y_size), 0);
             glVertex3f(CurrentPosition(x0, i, x_size), NextPosition(y0, j, y_size), 0);
             glEnd();
-            glNormal3f(0, 0, 1);
+            // print all vertices of the square
+            /*cout << CurrentPosition(x0, i, x_size) << " " << CurrentPosition(y0, j, y_size) << " " << 0 << endl;
+            cout << NextPosition(x0, i, x_size) << " " << CurrentPosition(y0, j, y_size) << " " << 0 << endl;
+            cout << NextPosition(x0, i, x_size) << " " << NextPosition(y0, j, y_size) << " " << 0 << endl;
+            cout << CurrentPosition(x0, i, x_size) << " " << NextPosition(y0, j, y_size) << " " << 0 << endl;
+             */
         }
     }
-return;
-    numberOfSquares = 1;
-
-
-
 
 
 /* Ceiling */
     for (int i = 0; i < numberOfSquares; i++) {
+        for (int j = 0; j < numberOfSquares; j++) {
 
-        glBegin(GL_QUADS);
-        glVertex3f(CurrentPosition(x0, i, x_size), CurrentPosition(y0, i, y_size), z1);
-        glVertex3f(NextPosition(x0, i, x_size), CurrentPosition(y0, i, y_size), z1);
-        glVertex3f(NextPosition(x0, i, x_size), NextPosition(y0, i, y_size), z1);
-        glVertex3f(CurrentPosition(x0, i, x_size), NextPosition(y0, i, y_size), z1);
-        glEnd();
+            glNormal3f(0, 0, -1);
+            glBegin(GL_QUADS);
+            glVertex3f(CurrentPosition(x0, i, x_size), CurrentPosition(y0, j, y_size), z1);
+            glVertex3f(NextPosition(x0, i, x_size), CurrentPosition(y0, j, y_size), z1);
+            glVertex3f(NextPosition(x0, i, x_size), NextPosition(y0, j, y_size), z1);
+            glVertex3f(CurrentPosition(x0, i, x_size), NextPosition(y0, j, y_size), z1);
+            glEnd();
+        }
     }
 
 /* Walls */
 // Wall along X and Y = 0
 
     for (int i = 0; i < numberOfSquares; i++) {
+        for (int j = 0; j < numberOfSquares; j++) {
 
-        glBegin(GL_QUADS);
-        glVertex3f(CurrentPosition(x0, i, x_size), y0, CurrentPosition(z0, i, z_size));
-        glVertex3f(NextPosition(x0, i, x_size), y0, CurrentPosition(z0, i, z_size));
-        glVertex3f(NextPosition(x0, i, x_size), y0, NextPosition(z0, i, z_size));
-        glVertex3f(CurrentPosition(x0, i, x_size), y0, NextPosition(z0, i, z_size));
-        glEnd();
+            glBegin(GL_QUADS);
+            glVertex3f(CurrentPosition(x0, i, x_size), y0, CurrentPosition(z0, j, z_size));
+            glVertex3f(NextPosition(x0, i, x_size), y0, CurrentPosition(z0, j, z_size));
+            glVertex3f(NextPosition(x0, i, x_size), y0, NextPosition(z0, j, z_size));
+            glVertex3f(CurrentPosition(x0, i, x_size), y0, NextPosition(z0, j, z_size));
+            glEnd();
+            glNormal3f(0, 1, 0);
+        }
     }
 
 
 // Wall along Y and X = x1
 
     for (int i = 0; i < numberOfSquares; i++) {
+        for (int j = 0; j < numberOfSquares; j++) {
 
-        glBegin(GL_QUADS);
-        glVertex3f(x1, CurrentPosition(y0, i, y_size), CurrentPosition(z0, i, z_size));
-        glVertex3f(x1, NextPosition(y0, i, y_size), CurrentPosition(z0, i, z_size));
-        glVertex3f(x1, NextPosition(y0, i, y_size), NextPosition(z0, i, z_size));
-        glVertex3f(x1, CurrentPosition(y0, i, y_size), NextPosition(z0, i, z_size));
-        glEnd();
+            glBegin(GL_QUADS);
+            glVertex3f(x1, CurrentPosition(y0, i, y_size), CurrentPosition(z0, j, z_size));
+            glVertex3f(x1, NextPosition(y0, i, y_size), CurrentPosition(z0, j, z_size));
+            glVertex3f(x1, NextPosition(y0, i, y_size), NextPosition(z0, j, z_size));
+            glVertex3f(x1, CurrentPosition(y0, i, y_size), NextPosition(z0, j, z_size));
+            glEnd();
+            glNormal3f(-1, 0, 0);
+        }
     }
 
     // Wall along X and Y = y1
 
     for (int i = 0; i < numberOfSquares; i++) {
+        for (int j = 0; j < numberOfSquares; j++) {
 
-        glBegin(GL_QUADS);
-        glVertex3f(CurrentPosition(x0, i, x_size), y1, CurrentPosition(z0, i, z_size));
-        glVertex3f(NextPosition(x0, i, x_size), y1, CurrentPosition(z0, i, z_size));
-        glVertex3f(NextPosition(x0, i, x_size), y1, NextPosition(z0, i, z_size));
-        glVertex3f(CurrentPosition(x0, i, x_size), y1, NextPosition(z0, i, z_size));
-        glEnd();
+            glBegin(GL_QUADS);
+            glVertex3f(CurrentPosition(x0, i, x_size), y1, CurrentPosition(z0, j, z_size));
+            glVertex3f(NextPosition(x0, i, x_size), y1, CurrentPosition(z0, j, z_size));
+            glVertex3f(NextPosition(x0, i, x_size), y1, NextPosition(z0, j, z_size));
+            glVertex3f(CurrentPosition(x0, i, x_size), y1, NextPosition(z0, j, z_size));
+            glEnd();
+            glNormal3f(0, -1, 0);
+        }
     }
 
     // Wall along Y and X = 0
 
     for (int i = 0; i < numberOfSquares; i++) {
+        for (int j = 0; j < numberOfSquares; j++) {
 
-        glBegin(GL_QUADS);
-        glVertex3f(x0, CurrentPosition(y0, i, y_size), CurrentPosition(z0, i, z_size));
-        glVertex3f(x0, NextPosition(y0, i, y_size), CurrentPosition(z0, i, z_size));
-        glVertex3f(x0, NextPosition(y0, i, y_size), NextPosition(z0, i, z_size));
-        glVertex3f(x0, CurrentPosition(y0, i, y_size), NextPosition(z0, i, z_size));
-        glEnd();
+            glBegin(GL_QUADS);
+            glVertex3f(x0, CurrentPosition(y0, i, y_size), CurrentPosition(z0, j, z_size));
+            glVertex3f(x0, NextPosition(y0, i, y_size), CurrentPosition(z0, j, z_size));
+            glVertex3f(x0, NextPosition(y0, i, y_size), NextPosition(z0, j, z_size));
+            glVertex3f(x0, CurrentPosition(y0, i, y_size), NextPosition(z0, j, z_size));
+            glEnd();
+        }
     }
 }
 
@@ -336,38 +337,58 @@ void renderScene(void) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     //
-    GLfloat eyeX = 0;
-    GLfloat eyeY = 0;
-    GLfloat eyeZ = 5;
-    GLfloat lookAtX = 0;
-    GLfloat lookAtY = 0;
-    GLfloat lookAtZ = -1;
-    if (eye_camera) {
-        glTranslatef(player->ObtemRadiusColisao()/2, 0, 0);
 
+
+
+
+
+    if (eye_camera) {
+
+
+        // gluPerspective(180, (float) TAM_JANELA / TAM_JANELA, 200, 1000);
+
+        // Girar 90 graus no eixo X para que o eixo Z fique para cima
         glRotatef(-90, 1, 0, 0);
+
+
+        // Girar o angulo theta no eixo Z para que o eixo X fique para frente
         glRotatef(-player->ObtemTheta() + 90, 0, 0, 1);
 
 
+        // Mover o centro do mundo para o centro do jogador
         glTranslatef(-player->ObtemX(), -player->ObtemY(), -player->center());
 
-        eyeX = player->ObtemX() + cos(toRad(theta)) * player->ObtemRadiusColisao();
-        eyeY = player->ObtemY() + sin(toRad(theta)) * player->ObtemRadiusColisao();
-        eyeZ = player->center();
-        lookAtX = player->ObtemX() + cos(toRad(theta)) * player->ObtemRadiusColisao();
-        lookAtY = player->ObtemY() +sin(toRad(theta)) * player->ObtemRadiusColisao();
-        lookAtZ = player->center();
+
     } else if (top_camera) {
-        eyeX = zoom * sin(toRad(theta)) * cos((toRad(phi))) + player->ObtemX();
-        eyeY = zoom * cos(toRad(theta)) * cos((toRad(phi))) + player->ObtemY();
-        eyeZ = zoom * sin(toRad(phi)) + player->center();
-        lookAtX = player->ObtemX();
-        lookAtY = player->ObtemY();
-        lookAtZ = player->center();
+        GLfloat eyeX = zoom * sin(toRad(theta)) * cos((toRad(phi))) + player->ObtemX();
+        GLfloat eyeY = zoom * cos(toRad(theta)) * cos((toRad(phi))) + player->ObtemY();
+        GLfloat eyeZ = zoom * sin(toRad(phi)) + player->center();
+        GLfloat lookAtX = player->ObtemX();
+        GLfloat lookAtY = player->ObtemY();
+        GLfloat lookAtZ = player->center();
         gluLookAt(eyeX, eyeY, eyeZ, lookAtX, lookAtY, lookAtZ, 0, 0, 1);
     }
 
+    DrawAxes(100);
 
+
+    glPushMatrix();
+
+    //glTranslatef(player->ObtemRadiusColisao()/2, 0, 0);
+
+    glTranslatef(player->ObtemX(), player->ObtemY(), player->center());
+    glRotatef(player->ObtemTheta(), 0, 0, 1);
+    glTranslatef(player->ObtemRadiusColisao() / 2, 0, 0);
+
+
+    // Preciso rotacionar -90 pra coloca ro z pra cima
+    //glRotatef(-90, 1, 0, 0);
+    //glRotatef(90, 0, 1, 0);
+
+    //DrawAxes(100);
+
+
+    glPopMatrix();
 
     switch_light_mode();
 
@@ -395,10 +416,10 @@ void renderScene(void) {
     glColor3f(1, 0, 0);
     glLineWidth(2);
     glBegin(GL_QUADS);
-    glVertex3f(TAM_JANELA*0.5 - 20, TAM_JANELA*0.5- 20, 10);
-    glVertex3f(TAM_JANELA- 20, TAM_JANELA*0.5- 20, 10);
-    glVertex3f(TAM_JANELA- 20, TAM_JANELA- 20, 10);
-    glVertex3f(TAM_JANELA*0.5- 20, TAM_JANELA- 20, 10);
+    glVertex3f(TAM_JANELA * 0.5 - 20, TAM_JANELA * 0.5 - 20, 10);
+    glVertex3f(TAM_JANELA - 20, TAM_JANELA * 0.5 - 20, 10);
+    glVertex3f(TAM_JANELA - 20, TAM_JANELA - 20, 10);
+    glVertex3f(TAM_JANELA * 0.5 - 20, TAM_JANELA - 20, 10);
     glEnd();
 
 
@@ -412,8 +433,8 @@ void renderScene(void) {
 
     glPushMatrix();
 
-    GLfloat x0 = player->ObtemX()/Width * TAM_JANELA*0.5 - 20;
-    GLfloat y0 = player->ObtemY()/Height * TAM_JANELA*0.5 - 20;
+    GLfloat x0 = player->ObtemX() / Width * TAM_JANELA * 0.5 - 20;
+    GLfloat y0 = player->ObtemY() / Height * TAM_JANELA * 0.5 - 20;
     // translate to the player position proportionally to the minimap
     glTranslatef(x0, y0, 0);
 
@@ -436,8 +457,6 @@ void renderScene(void) {
     glPopMatrix(); // revert back to the matrix I had before.
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
-
-
 
 
     glutSwapBuffers(); // Desenha the new frame of the game.
@@ -814,7 +833,7 @@ void init(void) {
 
     //Ajusta o tamanho da tela com a janela de visualizacao
     glViewport(0, 0, (GLsizei) TAM_JANELA, (GLsizei) TAM_JANELA);
-    gluPerspective(45, 1, 100, 10000);
+    gluPerspective(70, 1, 100, 10000);
     glMatrixMode(GL_MODELVIEW);  // Select the projection matrix
     glLoadIdentity();
 }

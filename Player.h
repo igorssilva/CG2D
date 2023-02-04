@@ -8,6 +8,7 @@
 
 #define ARM_POSITION 90
 #define DEFAULT_ARM_ANGLE 45
+#define MAX_ARM_ANGLE 45
 #define INC_MOVE 0.3
 #define INC_ROTATE 0.3
 

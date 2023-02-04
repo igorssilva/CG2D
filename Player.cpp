@@ -153,7 +153,7 @@ void Player::DesenhaBraco(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
 
 
     glTranslatef(width, 0, 0.0);
-    glRotatef(-ARM_POSITION - thetaL, 0, 0, 1);
+    glRotatef(-ARM_POSITION - thetaL+ (thetaL*0.7), 0, 0, 1);
 
     this->DesenhaLuva(radiusHand, 1.0, 0.0, 0.0);
     this->DesenhaRect(height, width, 0.0, 0.0, 0.0);
@@ -174,7 +174,7 @@ void Player::DesenhaBraco(GLfloat thetaR, GLfloat thetaL, GLfloat radius) {
     this->DesenhaRect(height, width, 1.0, 1.0, 1.0);
 
     glTranslatef(width, 0, 0.0);
-    glRotatef(ARM_POSITION + thetaR, 0, 0, 1);
+    glRotatef(ARM_POSITION + thetaR- (thetaR*0.7), 0, 0, 1);
 
     // draw elbow
     this->DesenhaLuva(radiusHand, 1.0, 0.0, 0.0);
@@ -560,8 +560,7 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
             }
             inc = dx / maxWidthPunch;
 
-            this->RodaBracoDireito(inc * DEFAULT_ARM_ANGLE);
-            cout << "Roda braco direito: " << inc * DEFAULT_ARM_ANGLE << endl;
+            this->RodaBracoDireito(inc * MAX_ARM_ANGLE);
             this->RodaBracoEsquerdo(DEFAULT_ARM_ANGLE);
             if (this->isHitting(anotherPlayer)) {
                 if (!anotherPlayer->hit && currentPosition > this->lastAttackPosition) {
@@ -578,7 +577,7 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
                     dx = -maxWidthPunch;
                 }
                 inc = dx / maxWidthPunch;
-                this->RodaBracoEsquerdo(inc * DEFAULT_ARM_ANGLE);
+                this->RodaBracoEsquerdo(inc * MAX_ARM_ANGLE);
                 this->RodaBracoDireito(DEFAULT_ARM_ANGLE);
 
                 if (this->isHitting(anotherPlayer)) {
@@ -600,7 +599,7 @@ void Player::Punch(GLfloat maxWidthPunch, int currentPosition, Player *anotherPl
 
 
 float Player::center() {
-    return this->gRadius * 4 + this->gRadius / 2;
+    return this->gRadius * 4 + this->gRadius / 4;
 }
 
 
