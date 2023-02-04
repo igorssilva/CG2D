@@ -100,8 +100,8 @@ void DrawAxes(double size) {
     //x axis red
     glDisable(GL_LIGHTING);
     glPushMatrix();
-    glMaterialfv(GL_FRONT, GL_DIFFUSE,
-                 mat_red);
+  //  glMaterialfv(GL_FRONT, GL_DIFFUSE,
+   //              mat_red);
     glColor3f(1,0,0);
     glScalef(size, size * 0.1, size * 0.1);
     glTranslatef(0.5, 0, 0); // put in one end
@@ -111,8 +111,8 @@ void DrawAxes(double size) {
     //y axis green
     glPushMatrix();
     GLfloat mat_green[] = {0.0, 1.0, 0.0, 1.0};
-    glMaterialfv(GL_FRONT, GL_DIFFUSE,
-                 mat_green);
+   // glMaterialfv(GL_FRONT, GL_DIFFUSE,
+   //              mat_green);
     glColor3f(0,1,0);
     glRotatef(90, 0, 0, 1);
     glScalef(size, size * 0.1, size * 0.1);
@@ -123,7 +123,7 @@ void DrawAxes(double size) {
     //z axis blue
     glPushMatrix();
     GLfloat mat_blue[] = {0.0, 0.0, 1.0, 1.0};
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_blue);
+  //  glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_blue);
     glColor3f(0,0,1);
     glRotatef(-90, 0, 1, 0);
     glScalef(size, size * 0.1, size * 0.1);

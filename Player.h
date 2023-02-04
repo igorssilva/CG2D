@@ -154,6 +154,8 @@ public:
     float center();
 
     float height();
+
+    int ObtemThetaR();
 };
 
 

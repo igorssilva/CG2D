@@ -606,3 +606,7 @@ float Player::center() {
 float Player::height() {
     return this->gRadius * 8;
 }
+
+int Player::ObtemThetaR() {
+    return this->gThetaR;
+}

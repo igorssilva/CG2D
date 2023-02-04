@@ -7,6 +7,7 @@
 #include <sstream>
 #include "Player.h"
 #include "Transformations.h"
+#include "imageloader.h"
 
 #define LINE_HEIGHT 20
 #define TAM_JANELA 500
@@ -38,6 +39,8 @@ void opponentView();
 void setCamMode();
 
 void playerView();
+
+GLuint LoadTextureRAW(const char *string, GLuint &width, GLuint &height);
 
 void *font = GLUT_BITMAP_TIMES_ROMAN_24;
 
@@ -76,6 +79,21 @@ bool top_camera = false;
 
 bool bot_active = false;
 bool moving_bot = false;
+
+bool bot_camera = false;
+
+GLuint tex_floor;
+GLuint tex_floor_width;
+GLuint tex_floor_height;
+
+GLuint tex_wall;
+GLuint tex_wall_width;
+GLuint tex_wall_height;
+
+
+GLuint tex_ceiling;
+GLuint tex_ceiling_width;
+GLuint tex_ceiling_height;
 
 void switch_light_mode() {
     GLfloat light_position_x = 0;
@@ -121,7 +139,7 @@ void switch_light_mode() {
     } else {
         light_position_x = Width / 2;
         light_position_y = Height / 2;
-        light_position_z = player->ObtemRadiusColisao() * 4;
+        light_position_z = player->height() * 2 - 100;
         GLfloat light_position[] = {light_position_x, light_position_y, light_position_z, 1};
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
         if (show_ligth) {
@@ -154,7 +172,7 @@ void drawArena() {
 
     int numberOfSquares = 100;
 
-    GLfloat mat_blue[] = {0.0, 0.0, 1.0, 1.0};
+    GLfloat mat_blue[] = {1.0, 1.0, 1.0, 1.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_blue);
 
     GLfloat x0 = 0;
@@ -165,57 +183,120 @@ void drawArena() {
     GLfloat y1 = Height;
     GLfloat z1 = player->height() * 2;
 
-    GLfloat x_size = Width / numberOfSquares;
-    GLfloat y_size = Height / numberOfSquares;
-    GLfloat z_size = player->height() * 2 / numberOfSquares;
+    GLfloat x_size = Width / (float) numberOfSquares;
+    GLfloat y_size = Height / (float) numberOfSquares;
+    GLfloat z_size = player->height() * 2 / (float) numberOfSquares;
+
+    glEnable(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, tex_floor);
+    float h_tex_div = 1.0f / (float) numberOfSquares;
+    float v_tex_div = 1.0f / (float) numberOfSquares;
+
     for (int i = 0; i < numberOfSquares; i++) {
+
+
+        GLfloat h0 = CurrentPosition(x0, i, x_size);
+        GLfloat h1 = NextPosition(x0, i, x_size);
+
+        GLfloat th0 = h_tex_div * i;
+        GLfloat th1 = h_tex_div * (i + 1);
+
         for (int j = 0; j < numberOfSquares; j++) {
+
+            GLfloat v0 = CurrentPosition(y0, j, y_size);
+            GLfloat v1 = NextPosition(y0, j, y_size);
+
+
+            GLfloat tv0 = v_tex_div * j;
+            GLfloat tv1 = v_tex_div * (j + 1);
 
 
             glNormal3f(0, 0, 1);
             glBegin(GL_QUADS);
-            glVertex3f(CurrentPosition(x0, i, x_size), CurrentPosition(y0, j, y_size), 0);
-            glVertex3f(NextPosition(x0, i, x_size), CurrentPosition(y0, j, y_size), 0);
-            glVertex3f(NextPosition(x0, i, x_size), NextPosition(y0, j, y_size), 0);
-            glVertex3f(CurrentPosition(x0, i, x_size), NextPosition(y0, j, y_size), 0);
+            glTexCoord2f(th0, tv0);
+            glVertex3f(h0, v0, 0);
+
+            glTexCoord2f(th1, th0);
+            glVertex3f(h1, v0, 0);
+
+            glTexCoord2f(th1, tv1);
+            glVertex3f(h1, v1, 0);
+
+            glTexCoord2f(th0, tv1);
+            glVertex3f(h0, v1, 0);
             glEnd();
-            // print all vertices of the square
-            /*cout << CurrentPosition(x0, i, x_size) << " " << CurrentPosition(y0, j, y_size) << " " << 0 << endl;
-            cout << NextPosition(x0, i, x_size) << " " << CurrentPosition(y0, j, y_size) << " " << 0 << endl;
-            cout << NextPosition(x0, i, x_size) << " " << NextPosition(y0, j, y_size) << " " << 0 << endl;
-            cout << CurrentPosition(x0, i, x_size) << " " << NextPosition(y0, j, y_size) << " " << 0 << endl;
-             */
         }
     }
+
 
 
 /* Ceiling */
+    glBindTexture(GL_TEXTURE_2D, tex_ceiling);
     for (int i = 0; i < numberOfSquares; i++) {
+        GLfloat h0 = CurrentPosition(x0, i, x_size);
+        GLfloat h1 = NextPosition(x0, i, x_size);
+
+        GLfloat th0 = h_tex_div * i;
+        GLfloat th1 = h_tex_div * (i + 1);
+
         for (int j = 0; j < numberOfSquares; j++) {
+            GLfloat v0 = CurrentPosition(y0, j, y_size);
+            GLfloat v1 = NextPosition(y0, j, y_size);
+
+
+            GLfloat tv0 = v_tex_div * j;
+            GLfloat tv1 = v_tex_div * (j + 1);
 
             glNormal3f(0, 0, -1);
             glBegin(GL_QUADS);
-            glVertex3f(CurrentPosition(x0, i, x_size), CurrentPosition(y0, j, y_size), z1);
-            glVertex3f(NextPosition(x0, i, x_size), CurrentPosition(y0, j, y_size), z1);
-            glVertex3f(NextPosition(x0, i, x_size), NextPosition(y0, j, y_size), z1);
-            glVertex3f(CurrentPosition(x0, i, x_size), NextPosition(y0, j, y_size), z1);
+            glTexCoord2f(th0, tv0);
+            glVertex3f(h0, v0, z1);
+
+            glTexCoord2f(th1, th0);
+            glVertex3f(h1, v0, z1);
+
+            glTexCoord2f(th1, tv1);
+            glVertex3f(h1, v1, z1);
+
+            glTexCoord2f(th0, tv1);
+            glVertex3f(h0, v1, z1);
             glEnd();
         }
     }
-
 /* Walls */
 // Wall along X and Y = 0
 
+    glBindTexture(GL_TEXTURE_2D, tex_wall);
     for (int i = 0; i < numberOfSquares; i++) {
-        for (int j = 0; j < numberOfSquares; j++) {
+        GLfloat h0 = CurrentPosition(x0, i, x_size);
+        GLfloat h1 = NextPosition(x0, i, x_size);
 
-            glBegin(GL_QUADS);
-            glVertex3f(CurrentPosition(x0, i, x_size), y0, CurrentPosition(z0, j, z_size));
-            glVertex3f(NextPosition(x0, i, x_size), y0, CurrentPosition(z0, j, z_size));
-            glVertex3f(NextPosition(x0, i, x_size), y0, NextPosition(z0, j, z_size));
-            glVertex3f(CurrentPosition(x0, i, x_size), y0, NextPosition(z0, j, z_size));
-            glEnd();
+        GLfloat th0 = h_tex_div * i;
+        GLfloat th1 = h_tex_div * (i + 1);
+
+        for (int j = 0; j < numberOfSquares; j++) {
+            GLfloat v0 = CurrentPosition(z0, j, z_size);
+            GLfloat v1 = NextPosition(z0, j, z_size);
+
+
+            GLfloat tv0 = v_tex_div * j;
+            GLfloat tv1 = v_tex_div * (j + 1);
+
             glNormal3f(0, 1, 0);
+            glBegin(GL_QUADS);
+            glTexCoord2f(th0, tv0);
+            glVertex3f(h0, y0, v0);
+
+            glTexCoord2f(th1, th0);
+            glVertex3f(h1, y0, v0);
+
+            glTexCoord2f(th1, tv1);
+            glVertex3f(h1, y0, v1);
+
+            glTexCoord2f(th0, tv1);
+            glVertex3f(h0, y0, v1);
+            glEnd();
         }
     }
 
@@ -223,46 +304,126 @@ void drawArena() {
 // Wall along Y and X = x1
 
     for (int i = 0; i < numberOfSquares; i++) {
-        for (int j = 0; j < numberOfSquares; j++) {
+        GLfloat h0 = CurrentPosition(y0, i, y_size);
+        GLfloat h1 = NextPosition(y0, i, y_size);
 
-            glBegin(GL_QUADS);
-            glVertex3f(x1, CurrentPosition(y0, i, y_size), CurrentPosition(z0, j, z_size));
-            glVertex3f(x1, NextPosition(y0, i, y_size), CurrentPosition(z0, j, z_size));
-            glVertex3f(x1, NextPosition(y0, i, y_size), NextPosition(z0, j, z_size));
-            glVertex3f(x1, CurrentPosition(y0, i, y_size), NextPosition(z0, j, z_size));
-            glEnd();
+        GLfloat th0 = h_tex_div * i;
+        GLfloat th1 = h_tex_div * (i + 1);
+
+        for (int j = 0; j < numberOfSquares; j++) {
+            GLfloat v0 = CurrentPosition(z0, j, z_size);
+            GLfloat v1 = NextPosition(z0, j, z_size);
+
+
+            GLfloat tv0 = v_tex_div * j;
+            GLfloat tv1 = v_tex_div * (j + 1);
+
             glNormal3f(-1, 0, 0);
+            glBegin(GL_QUADS);
+
+            glTexCoord2f(th0, tv0);
+            glVertex3f(x1, h0, v0);
+
+            glTexCoord2f(th1, th0);
+            glVertex3f(x1, h1, v0);
+
+            glTexCoord2f(th1, tv1);
+            glVertex3f(x1, h1, v1);
+
+            glTexCoord2f(th0, tv1);
+            glVertex3f(x1, h0, v1);
+
+            glEnd();
         }
     }
 
     // Wall along X and Y = y1
 
     for (int i = 0; i < numberOfSquares; i++) {
-        for (int j = 0; j < numberOfSquares; j++) {
+        GLfloat h0 = CurrentPosition(x0, i, x_size);
+        GLfloat h1 = NextPosition(x0, i, x_size);
 
-            glBegin(GL_QUADS);
-            glVertex3f(CurrentPosition(x0, i, x_size), y1, CurrentPosition(z0, j, z_size));
-            glVertex3f(NextPosition(x0, i, x_size), y1, CurrentPosition(z0, j, z_size));
-            glVertex3f(NextPosition(x0, i, x_size), y1, NextPosition(z0, j, z_size));
-            glVertex3f(CurrentPosition(x0, i, x_size), y1, NextPosition(z0, j, z_size));
-            glEnd();
+        GLfloat th0 = h_tex_div * i;
+        GLfloat th1 = h_tex_div * (i + 1);
+
+        if (i == numberOfSquares - 1) {
+            h1 = x1;
+            th1 = 1.0;
+        }
+        for (int j = 0; j < numberOfSquares; j++) {
+            GLfloat v0 = CurrentPosition(z0, j, z_size);
+            GLfloat v1 = NextPosition(z0, j, z_size);
+
+
+            GLfloat tv0 = v_tex_div * j;
+            GLfloat tv1 = v_tex_div * (j + 1);
+
+
+            if (j == numberOfSquares - 1) {
+                v1 = z1;
+                tv1 = 1.0;
+            }
             glNormal3f(0, -1, 0);
+            glBegin(GL_QUADS);
+            glTexCoord2f(th0, tv0);
+            glVertex3f(h0, y1, v0);
+
+            glTexCoord2f(th1, th0);
+            glVertex3f(h1, y1, v0);
+
+            glTexCoord2f(th1, tv1);
+            glVertex3f(h1, y1, v1);
+
+            glTexCoord2f(th0, tv1);
+            glVertex3f(h0, y1, v1);
+            glEnd();
         }
     }
 
     // Wall along Y and X = 0
 
     for (int i = 0; i < numberOfSquares; i++) {
-        for (int j = 0; j < numberOfSquares; j++) {
+        GLfloat h0 = CurrentPosition(y0, i, y_size);
+        GLfloat h1 = NextPosition(y0, i, y_size);
 
+        GLfloat th0 = h_tex_div * i;
+        GLfloat th1 = h_tex_div * (i + 1);
+
+        if (i == numberOfSquares - 1) {
+            h1 = y1;
+            th1 = 1.0;
+        }
+        for (int j = 0; j < numberOfSquares; j++) {
+            GLfloat v0 = CurrentPosition(z0, j, z_size);
+            GLfloat v1 = NextPosition(z0, j, z_size);
+
+
+            GLfloat tv0 = v_tex_div * j;
+            GLfloat tv1 = v_tex_div * (j + 1);
+
+
+            if (j == numberOfSquares - 1) {
+                v1 = z1;
+                tv1 = 1.0;
+            }
+            glNormal3f(1, 0, 0);
             glBegin(GL_QUADS);
-            glVertex3f(x0, CurrentPosition(y0, i, y_size), CurrentPosition(z0, j, z_size));
-            glVertex3f(x0, NextPosition(y0, i, y_size), CurrentPosition(z0, j, z_size));
-            glVertex3f(x0, NextPosition(y0, i, y_size), NextPosition(z0, j, z_size));
-            glVertex3f(x0, CurrentPosition(y0, i, y_size), NextPosition(z0, j, z_size));
+            glTexCoord2f(th0, tv0);
+            glVertex3f(x0, h0, v0);
+
+            glTexCoord2f(th1, th0);
+            glVertex3f(x0, h1, v0);
+
+            glTexCoord2f(th1, tv1);
+            glVertex3f(x0, h1, v1);
+
+            glTexCoord2f(th0, tv1);
+            glVertex3f(x0, h0, v1);
             glEnd();
         }
     }
+
+    glDisable(GL_TEXTURE_2D);
 }
 
 void ImprimeTexto(const unsigned char *aText, void *aFont, GLfloat x, GLfloat y, GLfloat xOffset, GLfloat yOffset,
@@ -323,7 +484,6 @@ void declareWinner() {
         const auto *str = reinterpret_cast<const unsigned char *>(text.c_str());
         const int width = glutBitmapLength(font, str);
 
-
         ImprimeTexto(str, font, TAM_JANELA / 2, TAM_JANELA / 2, -width / 2, 0, 1, 1, 1);
         gameOver = true;
     }
@@ -347,13 +507,29 @@ void renderScene(void) {
 
     playerView();
 
+
+    if (bot_camera) {
+        glutReshapeWindow(TAM_JANELA + 200, TAM_JANELA);
+        opponentView();
+    } else {
+        glutReshapeWindow(TAM_JANELA, TAM_JANELA);
+    }
+
+    if (bot_camera) {
+
+        glMatrixMode(GL_PROJECTION);
+        glViewport(0, 0, (GLsizei) TAM_JANELA + 200, (GLsizei) TAM_JANELA);
+
+    } else {
+
+        glMatrixMode(GL_PROJECTION);
+        glViewport(0, 0, (GLsizei) TAM_JANELA, (GLsizei) TAM_JANELA);
+    }
+
+
     ImprimePlacar();
     declareWinner();
     DrawMiniMap();
-
-    opponentView();
-
-
     glutSwapBuffers(); // Desenha the new frame of the game.
 }
 
@@ -392,7 +568,21 @@ void setCamMode() {
         GLfloat lookAtY = player->ObtemY();
         GLfloat lookAtZ = player->center();
         gluLookAt(eyeX, eyeY, eyeZ, lookAtX, lookAtY, lookAtZ, 0, 0, 1);
+    } else if (wrist_camera) {
+        // Girar -90 graus no eixo X para que o eixo Z fique para cima
+        glRotatef(-90, 1, 0, 0);
+
+
+        glTranslatef(-player->ObtemX(), -player->ObtemY(), -player->center());
+        glRotatef(-player->ObtemTheta() + 90, 0, 0, 1);
+        glTranslatef(0, player->ObtemRadiusColisao() / 2, 0);
+        glRotatef(-(-player->ObtemThetaR() - ARM_POSITION), 0, 0, 1);
+        glTranslatef(-player->ObtemRadiusColisao(), 0, 0.0);
+        glRotatef(-(ARM_POSITION + player->ObtemThetaR() - (player->ObtemThetaR() * 0.7)), 0, 0, 1);
+        glTranslatef(-player->ObtemRadiusColisao(), 0, 0.0);
+
     }
+
 }
 
 void opponentView() {
@@ -437,14 +627,15 @@ void DrawMiniMap() {
     glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
     glDisable(GL_LIGHTING);
 
+
     // Draw the minimap
-    glColor3f(1, 0, 0);
+    glColor3f(1, 1, 1);
     glLineWidth(2);
-    glBegin(GL_QUADS);
-    glVertex3f(TAM_JANELA * 0.5 - 20, TAM_JANELA * 0.5 - 20, 10);
-    glVertex3f(TAM_JANELA - 20, TAM_JANELA * 0.5 - 20, 10);
-    glVertex3f(TAM_JANELA - 20, TAM_JANELA - 20, 10);
-    glVertex3f(TAM_JANELA * 0.5 - 20, TAM_JANELA - 20, 10);
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(TAM_JANELA * 0.75, 0, 0);
+    glVertex3f(TAM_JANELA, 0, 0);
+    glVertex3f(TAM_JANELA, TAM_JANELA * 0.25, 0);
+    glVertex3f(TAM_JANELA * 0.75, TAM_JANELA * 0.25, 0);
     glEnd();
 
 
@@ -454,22 +645,42 @@ void DrawMiniMap() {
 
     glPointSize(3); // Tamanho dos pontos
 
-    glColor3f(0, 1, 0);
 
     glPushMatrix();
 
-    GLfloat x0 = player->ObtemX() / Width * TAM_JANELA * 0.5 - 20;
-    GLfloat y0 = player->ObtemY() / Height * TAM_JANELA * 0.5 - 20;
+    GLfloat x0 = (float) player->ObtemX() / Width * TAM_JANELA * 0.25;
+    GLfloat y0 = (float) player->ObtemY() / Height * TAM_JANELA * 0.25;
     // translate to the player position proportionally to the minimap
-    glTranslatef(x0, y0, 0);
+    glTranslatef(x0 + TAM_JANELA * 0.75, y0, 0);
 
-    glBegin(GL_LINES);
+    glColor3f(0, 1, 0);
+    glBegin(GL_POLYGON);
     for (int i = 0; i < quantPoints; i++) {
         float theta = 2.0f * M_PI * float(i) / float(quantPoints); // get the current angle
 
-        float x = 50 * cosf(theta); // calculate the x component
-        float y = 50 * sinf(theta); // calculate the y component
-        glVertex3f(x, y, 10.0);          // output vertex
+        float x = 10 * cosf(theta); // calculate the x component
+        float y = 10 * sinf(theta); // calculate the y component
+        glVertex3f(x, y, 1.0);          // output vertex
+    }
+
+    glEnd();
+    glPopMatrix();
+
+    glPushMatrix();
+
+    x0 = (float) npc->ObtemX() / Width * TAM_JANELA * 0.25;
+    y0 = (float) npc->ObtemY() / Height * TAM_JANELA * 0.25;
+    // translate to the player position proportionally to the minimap
+    glTranslatef(x0 + TAM_JANELA * 0.75, y0, 0);
+
+    glColor3f(1, 0, 0);
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < quantPoints; i++) {
+        float theta = 2.0f * M_PI * float(i) / float(quantPoints); // get the current angle
+
+        float x = 10 * cosf(theta); // calculate the x component
+        float y = 10 * sinf(theta); // calculate the y component
+        glVertex3f(x, y, 1.0);          // output vertex
     }
 
     glEnd();
@@ -521,6 +732,10 @@ void keyPress(unsigned char key, int x, int y) {
             top_camera = true;
             eye_camera = false;
             wrist_camera = false;
+            break;
+
+        case '4':
+            bot_camera = !bot_camera;
             break;
         case 'c':
         case 'C':
@@ -607,7 +822,8 @@ void motion(int x, int y, Player *p1, Player *p2) {
 
 void motion(int x, int y) {
     motion(x, y, player, npc);
-    if (rotating) {
+
+    if (rotating && top_camera) {
         theta += (x - last_x);
         if (theta > 360) {
             theta -= 360;
@@ -855,6 +1071,38 @@ void init(void) {
 
     //Ajusta o tamanho da tela com a janela de visualizacao
     gluPerspective(70, 1, 100, 10000);
+
+
+    tex_floor = LoadTextureRAW("floor.bmp", tex_floor_width, tex_floor_height);
+    tex_wall = LoadTextureRAW("wall.bmp", tex_wall_width, tex_wall_height);
+    tex_ceiling = LoadTextureRAW("ceiling.bmp", tex_ceiling_width, tex_ceiling_height);
+}
+
+GLuint LoadTextureRAW(const char *filename, GLuint &width, GLuint &height) {
+    GLuint texture;
+
+    Image *image = loadBMP(filename);
+    width = image->width;
+    height = image->height;
+
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,GL_REPLACE );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D,                //Always GL_TEXTURE_2D
+                 0,                            //0 for now
+                 GL_RGB,                       //Format OpenGL uses for image
+                 image->width, image->height,  //Width and height
+                 0,                            //The border of the image
+                 GL_RGB, //GL_RGB, because pixels are stored in RGB format
+                 GL_UNSIGNED_BYTE, //GL_UNSIGNED_BYTE, because pixels are stored
+            //as unsigned numbers
+                 image->pixels);               //The actual pixel data
+    delete image;
+
+    return texture;
 }
 
 int main(int argc, char *argv[]) {
@@ -870,7 +1118,7 @@ int main(int argc, char *argv[]) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
     // Create the window.
-    glutInitWindowSize(TAM_JANELA+200, TAM_JANELA);
+    glutInitWindowSize(TAM_JANELA, TAM_JANELA);
     glutInitWindowPosition(150, 50);
     glutCreateWindow("Jogo box 3D");
 
