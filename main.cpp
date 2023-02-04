@@ -141,7 +141,7 @@ GLfloat NextPosition(int i, GLfloat first, GLfloat size) {
 void drawArena() {
 
 
-    int numberOfSquares = 20;
+    int numberOfSquares = 200;
 
     GLfloat mat_blue[] = {0.0, 0.0, 1.0, 1.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_blue);
@@ -150,26 +150,16 @@ void drawArena() {
     GLfloat hdiv = Width / numberOfSquares;
     GLfloat vdiv = Height / numberOfSquares;
 
-
-    for (int i = 0; i < numberOfSquares; i++) {
-        for (int j = 0; j < numberOfSquares; j++) {
-
-            glPushMatrix();
-
-            glTranslatef(i * hdiv, j * vdiv, 0);
-            glScalef(hdiv, vdiv, 1);
-            glutSolidCube(1);
-
-
-            glPopMatrix();
-        }
-    }
-
-    numberOfSquares = 1;
-    GLfloat x_size = Width / numberOfSquares;
-    GLfloat y_size = Height / numberOfSquares;
-    GLfloat z_size = player->height()*2 / numberOfSquares;
-
+//    glPushMatrix();
+//
+//
+//    glTranslatef(Width/2, Height/2, 0);
+//    glScalef(Width, Height, 1);
+//    DrawAxes(1);
+//    glutSolidCube(1);
+//
+//    glPopMatrix();
+//    DrawAxes(10);
 
     GLfloat x0 = 0;
     GLfloat y0 = 0;
@@ -178,6 +168,27 @@ void drawArena() {
     GLfloat x1 =  Width;
     GLfloat y1 =  Height;
     GLfloat z1 =  player->height()*2;
+
+    GLfloat x_size = Width / numberOfSquares;
+    GLfloat y_size = Height / numberOfSquares;
+    GLfloat z_size = player->height()*2 / numberOfSquares;
+    for (int i = 0; i < numberOfSquares; i++) {
+        for (int j = 0; j < numberOfSquares; j++) {
+
+            glNormal3f(0, 0, 1);
+            glBegin(GL_QUADS);
+            glVertex3f(CurrentPosition(x0, i, x_size), CurrentPosition(y0, j, y_size), 0);
+            glVertex3f(NextPosition(x0, i, x_size), CurrentPosition(y0, j, y_size), 0);
+            glVertex3f(NextPosition(x0, i, x_size), NextPosition(y0, j, y_size), 0);
+            glVertex3f(CurrentPosition(x0, i, x_size), NextPosition(y0, j, y_size), 0);
+            glEnd();
+            glNormal3f(0, 0, 1);
+        }
+    }
+return;
+    numberOfSquares = 1;
+
+
 
 
 
@@ -332,12 +343,19 @@ void renderScene(void) {
     GLfloat lookAtY = 0;
     GLfloat lookAtZ = -1;
     if (eye_camera) {
-        theta = -player->ObtemTheta() - 90;
+        glTranslatef(player->ObtemRadiusColisao()/2, 0, 0);
+
+        glRotatef(-90, 1, 0, 0);
+        glRotatef(-player->ObtemTheta() + 90, 0, 0, 1);
+
+
+        glTranslatef(-player->ObtemX(), -player->ObtemY(), -player->center());
+
         eyeX = player->ObtemX() + cos(toRad(theta)) * player->ObtemRadiusColisao();
         eyeY = player->ObtemY() + sin(toRad(theta)) * player->ObtemRadiusColisao();
         eyeZ = player->center();
-        lookAtX = cos(toRad(theta)) * player->ObtemRadiusColisao();
-        lookAtY = sin(toRad(theta)) * player->ObtemRadiusColisao();
+        lookAtX = player->ObtemX() + cos(toRad(theta)) * player->ObtemRadiusColisao();
+        lookAtY = player->ObtemY() +sin(toRad(theta)) * player->ObtemRadiusColisao();
         lookAtZ = player->center();
     } else if (top_camera) {
         eyeX = zoom * sin(toRad(theta)) * cos((toRad(phi))) + player->ObtemX();
@@ -346,10 +364,10 @@ void renderScene(void) {
         lookAtX = player->ObtemX();
         lookAtY = player->ObtemY();
         lookAtZ = player->center();
+        gluLookAt(eyeX, eyeY, eyeZ, lookAtX, lookAtY, lookAtZ, 0, 0, 1);
     }
 
 
-    gluLookAt(eyeX, eyeY, eyeZ, lookAtX, lookAtY, lookAtZ, 0, 0, 1);
 
     switch_light_mode();
 
@@ -543,6 +561,11 @@ void motion(int x, int y, Player *p1, Player *p2) {
         p1->Punch(maxWidthPunch, x, p2);
     }
 
+
+}
+
+void motion(int x, int y) {
+    motion(x, y, player, npc);
     if (rotating) {
         theta += (x - last_x);
         if (theta > 360) {
@@ -559,10 +582,6 @@ void motion(int x, int y, Player *p1, Player *p2) {
         last_x = x;
         last_y = y;
     }
-}
-
-void motion(int x, int y) {
-    motion(x, y, player, npc);
     glutPostRedisplay();
 }
 
@@ -795,7 +814,7 @@ void init(void) {
 
     //Ajusta o tamanho da tela com a janela de visualizacao
     glViewport(0, 0, (GLsizei) TAM_JANELA, (GLsizei) TAM_JANELA);
-    gluPerspective(45, 1, 10, 10000);
+    gluPerspective(45, 1, 100, 10000);
     glMatrixMode(GL_MODELVIEW);  // Select the projection matrix
     glLoadIdentity();
 }

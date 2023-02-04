@@ -198,7 +198,7 @@ void Player::DesenhaPlayer(GLfloat x, GLfloat y, GLfloat theta,
     glRotatef(theta, 0, 0, 1);
     DesenhaPerna(0, 0, radius);
 
-    glTranslatef(0, 0, radius * 4 + radius / 2);
+    glTranslatef(0, 0, radius * 4 + radius / 4);
     // Draw both arms
     this->DesenhaBraco(this->gThetaR, this->gThetaL, radius);
 
@@ -432,7 +432,7 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
         }
 
 
-        if (this->right_leg_up) {
+     /*   if (this->right_leg_up) {
 
             this->gThetaRL += (int) (INC_ROTATE * timeDifference);
             this->gThetaLL -= (int) (INC_ROTATE * timeDifference);
@@ -458,7 +458,7 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
                 this->gThetaLL = max_angle_leg;
                 this->right_leg_up = true;
             }
-        }
+        }*/
 
         this->Move(-INC_MOVE * timeDifference);
 
@@ -476,7 +476,7 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
             this->Rotate(-INC_ROTATE / 5 * timeDifference);
         }
 
-        if (this->right_leg_up) {
+      /*  if (this->right_leg_up) {
 
             this->gThetaRL += (int) (INC_ROTATE * timeDifference);
             this->gThetaLL -= (int) (INC_ROTATE * timeDifference);
@@ -502,7 +502,7 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
                 this->gThetaLL = max_angle_leg;
                 this->right_leg_up = true;
             }
-        }
+        }*/
         this->Move(INC_MOVE * timeDifference);
         if (!this->isInbound(width, height) || this->isColliding(anotherPlayer)) {
 
