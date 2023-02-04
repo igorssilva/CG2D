@@ -29,6 +29,12 @@ bool gameOver;
 
 void loadArenaScenario(std::string svgFileName);
 
+void DrawMiniMap();
+
+void drawElements();
+
+void opponentView();
+
 void *font = GLUT_BITMAP_TIMES_ROMAN_24;
 
 // Configurações iniciais de movimento do NPC
@@ -334,7 +340,10 @@ void renderScene(void) {
     // Clear the screen.
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
+
+    glMatrixMode(GL_PROJECTION);
+    glViewport(0, 0, (GLsizei) TAM_JANELA, (GLsizei) TAM_JANELA);
+    glMatrixMode(GL_MODELVIEW);  // Select the projection matrix
     glLoadIdentity();
     //
 
@@ -345,7 +354,6 @@ void renderScene(void) {
     if (eye_camera) {
 
 
-        // gluPerspective(180, (float) TAM_JANELA / TAM_JANELA, 200, 1000);
 
         // Girar 90 graus no eixo X para que o eixo Z fique para cima
         glRotatef(-90, 1, 0, 0);
@@ -369,35 +377,47 @@ void renderScene(void) {
         gluLookAt(eyeX, eyeY, eyeZ, lookAtX, lookAtY, lookAtZ, 0, 0, 1);
     }
 
-    DrawAxes(100);
+    drawElements();
+
+    ImprimePlacar();
+    declareWinner();
+    DrawMiniMap();
 
 
-    glPushMatrix();
-
-    //glTranslatef(player->ObtemRadiusColisao()/2, 0, 0);
-
-    glTranslatef(player->ObtemX(), player->ObtemY(), player->center());
-    glRotatef(player->ObtemTheta(), 0, 0, 1);
-    glTranslatef(player->ObtemRadiusColisao() / 2, 0, 0);
+    opponentView();
 
 
-    // Preciso rotacionar -90 pra coloca ro z pra cima
-    //glRotatef(-90, 1, 0, 0);
-    //glRotatef(90, 0, 1, 0);
+    glutSwapBuffers(); // Desenha the new frame of the game.
+}
 
-    //DrawAxes(100);
+void opponentView() {
+    glMatrixMode(GL_PROJECTION);
+    glViewport(TAM_JANELA, 0, (GLsizei) 200, (GLsizei) TAM_JANELA);
+    glMatrixMode(GL_MODELVIEW);  // Select the projection matrix
+    glLoadIdentity();
+    // Girar 90 graus no eixo X para que o eixo Z fique para cima
+    glRotatef(-90, 1, 0, 0);
 
 
-    glPopMatrix();
+    // Girar o angulo theta no eixo Z para que o eixo X fique para frente
+    glRotatef(-npc->ObtemTheta() + 90, 0, 0, 1);
 
+
+    // Mover o centro do mundo para o centro do jogador
+    glTranslatef(-npc->ObtemX(), -npc->ObtemY(), -npc->center());
+
+    drawElements();
+}
+
+void drawElements() {
     switch_light_mode();
 
     drawArena();
     player->Desenha();
     npc->Desenha();
+}
 
-    ImprimePlacar();
-    declareWinner();
+void DrawMiniMap() {
     glScalef(0.1, 0.1, 0.1);
 
     glMatrixMode(GL_PROJECTION);
@@ -457,9 +477,6 @@ void renderScene(void) {
     glPopMatrix(); // revert back to the matrix I had before.
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
-
-
-    glutSwapBuffers(); // Desenha the new frame of the game.
 }
 
 
@@ -832,10 +849,7 @@ void init(void) {
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
 
     //Ajusta o tamanho da tela com a janela de visualizacao
-    glViewport(0, 0, (GLsizei) TAM_JANELA, (GLsizei) TAM_JANELA);
     gluPerspective(70, 1, 100, 10000);
-    glMatrixMode(GL_MODELVIEW);  // Select the projection matrix
-    glLoadIdentity();
 }
 
 int main(int argc, char *argv[]) {
@@ -851,7 +865,7 @@ int main(int argc, char *argv[]) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
     // Create the window.
-    glutInitWindowSize(TAM_JANELA, TAM_JANELA);
+    glutInitWindowSize(TAM_JANELA+200, TAM_JANELA);
     glutInitWindowPosition(150, 50);
     glutCreateWindow("Jogo box 3D");
 
