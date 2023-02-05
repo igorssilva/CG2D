@@ -97,6 +97,9 @@ GLuint tex_ceiling;
 GLuint tex_ceiling_width;
 GLuint tex_ceiling_height;
 
+
+int numberOfSquares = 1;
+
 void switch_light_mode() {
     GLfloat light_position_x = 0;
     GLfloat light_position_y = 0;
@@ -172,7 +175,6 @@ GLfloat NextPosition(GLfloat first, int current_index, GLfloat size) {
 void drawArena() {
 
 
-    int numberOfSquares = 50;
 
     GLfloat mat_blue[] = {1.0, 1.0, 1.0, 1.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_blue);
@@ -780,6 +782,12 @@ void keyPress(unsigned char key, int x, int y) {
             if (punchVelocity > 10) {
                 punchVelocity--;
             }
+            break;
+        case '5':
+            numberOfSquares = 50;
+            break;
+            case '6':
+            numberOfSquares = 1;
             break;
     }
 
