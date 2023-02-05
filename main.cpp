@@ -11,6 +11,8 @@
 
 #define LINE_HEIGHT 20
 #define TAM_JANELA 500
+#define MIN_ZOOM 74.5
+#define MAX_ZOOM 300
 
 using namespace tinyxml2;
 using namespace std;
@@ -55,11 +57,11 @@ bool punchingRight = true;
 bool punchingLeft = false;
 
 
-float zoom = 450.0f;
+float zoom = MAX_ZOOM;
 
 float theta = 45.0f;
 
-float phi = 30.0f;
+float phi = 60.0f;
 
 
 bool nigth_mode = false;
@@ -565,8 +567,9 @@ void setCamMode() {
     } else if (wrist_camera) {
         // Girar -90 graus no eixo X para que o eixo Z fique para cima
         glRotatef(-90, 1, 0, 0);
-
-        glTranslatef(-player->ObtemRadiusColisao(), 0, 0.0);
+        glRotatef(90, 0, 0, 1);
+        glTranslatef(0, 0, -player->ObtemRadiusColisao() / 5);
+        glTranslatef(-(player->ObtemRadiusColisao() - player->ObtemRadiusColisao() / 2), 0, 0.0);
 
         glRotatef(-(ARM_POSITION + player->ObtemThetaR() - (player->ObtemThetaR() * 0.7)), 0, 0, 1);
 
@@ -576,13 +579,14 @@ void setCamMode() {
 
         glTranslatef(0, player->ObtemRadiusColisao() / 2, 0);
 
-        //glTranslatef(0, 0, -player->center());
+        glTranslatef(0, 0, -player->center());
 
-        glRotatef(-player->ObtemTheta() + 90, 0, 0, 1);
+        glRotatef(-player->ObtemTheta(), 0, 0, 1);
 
-        glTranslatef(-player->ObtemX(), -player->ObtemY(), -player->center());
+        glTranslatef(-player->ObtemX(), -player->ObtemY(), 0);
 
     }
+
 
 }
 
@@ -749,13 +753,20 @@ void keyPress(unsigned char key, int x, int y) {
             moving_bot = !moving_bot;
             break;
         case '+':
-            zoom -= 50.5;
+            zoom -= 25.5;
+            cout << "Zoom: " << zoom << endl;
+            if (zoom <= MIN_ZOOM) {
+                zoom = MIN_ZOOM;
+            }
             break;
         case GLUT_UP:
             punchMaxCount++;
             break;
         case '-':
-            zoom += 50.5;
+            zoom += 25.5;
+            if (zoom >= MAX_ZOOM) {
+                zoom = MAX_ZOOM;
+            }
             break;
         case GLUT_DOWN:
             punchMaxCount--;

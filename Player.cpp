@@ -433,33 +433,7 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
         }
 
 
-     /*   if (this->right_leg_up) {
-
-            this->gThetaRL += (int) (INC_ROTATE * timeDifference);
-            this->gThetaLL -= (int) (INC_ROTATE * timeDifference);
-
-            if (this->gThetaRL >= max_angle_leg) {
-                this->gThetaRL = max_angle_leg;
-                this->right_leg_up = false;
-            }
-            if (this->gThetaLL <= min_angle_leg) {
-                this->gThetaLL = min_angle_leg;
-                this->right_leg_up = false;
-            }
-
-        } else {
-            this->gThetaRL -= (int) (INC_ROTATE * timeDifference);
-            this->gThetaLL += (int) (INC_ROTATE * timeDifference);
-
-            if (this->gThetaRL <= min_angle_leg) {
-                this->gThetaRL = min_angle_leg;
-                this->right_leg_up = true;
-            }
-            if (this->gThetaLL >= max_angle_leg) {
-                this->gThetaLL = max_angle_leg;
-                this->right_leg_up = true;
-            }
-        }*/
+        moveLeg(timeDifference);
 
         this->Move(-INC_MOVE * timeDifference);
 
@@ -477,39 +451,43 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
             this->Rotate(-INC_ROTATE / 5 * timeDifference);
         }
 
-        if (this->right_leg_up) {
-
-            this->gThetaRL += (int) (INC_ROTATE * timeDifference);
-            this->gThetaLL -= (int) (INC_ROTATE * timeDifference);
-
-            if (this->gThetaRL >= max_angle_leg) {
-                this->gThetaRL = max_angle_leg;
-                this->right_leg_up = false;
-            }
-            if (this->gThetaLL <= min_angle_leg) {
-                this->gThetaLL = min_angle_leg;
-                this->right_leg_up = false;
-            }
-
-        } else {
-            this->gThetaRL -= (int) (INC_ROTATE * timeDifference);
-            this->gThetaLL += (int) (INC_ROTATE * timeDifference);
-
-            if (this->gThetaRL <= min_angle_leg) {
-                this->gThetaRL = min_angle_leg;
-                this->right_leg_up = true;
-            }
-            if (this->gThetaLL >=  max_angle_leg) {
-                this->gThetaLL = max_angle_leg;
-                this->right_leg_up = true;
-            }
-        }
+        moveLeg(timeDifference);
         this->Move(INC_MOVE * timeDifference);
         if (!this->isInbound(width, height) || this->isColliding(anotherPlayer)) {
 
             this->Move(-INC_MOVE * timeDifference);
         }
 
+    }
+}
+
+void Player::moveLeg(GLdouble timeDifference) {
+    if (right_leg_up) {
+
+        gThetaRL += (int) (INC_ROTATE * timeDifference);
+        gThetaLL -= (int) (INC_ROTATE * timeDifference);
+
+        if (gThetaRL >= max_angle_leg) {
+            gThetaRL = max_angle_leg;
+            right_leg_up = false;
+        }
+        if (gThetaLL <= min_angle_leg) {
+            gThetaLL = min_angle_leg;
+            right_leg_up = false;
+        }
+
+    } else {
+        gThetaRL -= (int) (INC_ROTATE * timeDifference);
+        gThetaLL += (int) (INC_ROTATE * timeDifference);
+
+        if (gThetaRL <= min_angle_leg) {
+            gThetaRL = min_angle_leg;
+            right_leg_up = true;
+        }
+        if (gThetaLL >= max_angle_leg) {
+            gThetaLL = max_angle_leg;
+            right_leg_up = true;
+        }
     }
 }
 

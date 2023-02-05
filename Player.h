@@ -156,6 +156,8 @@ public:
     float height();
 
     int ObtemThetaR();
+
+    void moveLeg(GLdouble timeDifference);
 };
 
 
