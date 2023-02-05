@@ -511,16 +511,10 @@ void renderScene(void) {
     if (bot_camera) {
         glutReshapeWindow(TAM_JANELA + 200, TAM_JANELA);
         opponentView();
-    } else {
-        glutReshapeWindow(TAM_JANELA, TAM_JANELA);
-    }
-
-    if (bot_camera) {
-
         glMatrixMode(GL_PROJECTION);
         glViewport(0, 0, (GLsizei) TAM_JANELA + 200, (GLsizei) TAM_JANELA);
-
     } else {
+        glutReshapeWindow(TAM_JANELA, TAM_JANELA);
 
         glMatrixMode(GL_PROJECTION);
         glViewport(0, 0, (GLsizei) TAM_JANELA, (GLsizei) TAM_JANELA);
@@ -572,14 +566,21 @@ void setCamMode() {
         // Girar -90 graus no eixo X para que o eixo Z fique para cima
         glRotatef(-90, 1, 0, 0);
 
+        glTranslatef(-player->ObtemRadiusColisao(), 0, 0.0);
+
+        glRotatef(-(ARM_POSITION + player->ObtemThetaR() - (player->ObtemThetaR() * 0.7)), 0, 0, 1);
+
+        glTranslatef(-player->ObtemRadiusColisao(), 0, 0.0);
+
+        glRotatef(-(-player->ObtemThetaR() - ARM_POSITION), 0, 0, 1);
+
+        glTranslatef(0, player->ObtemRadiusColisao() / 2, 0);
+
+        //glTranslatef(0, 0, -player->center());
+
+        glRotatef(-player->ObtemTheta() + 90, 0, 0, 1);
 
         glTranslatef(-player->ObtemX(), -player->ObtemY(), -player->center());
-        glRotatef(-player->ObtemTheta() + 90, 0, 0, 1);
-        glTranslatef(0, player->ObtemRadiusColisao() / 2, 0);
-        glRotatef(-(-player->ObtemThetaR() - ARM_POSITION), 0, 0, 1);
-        glTranslatef(-player->ObtemRadiusColisao(), 0, 0.0);
-        glRotatef(-(ARM_POSITION + player->ObtemThetaR() - (player->ObtemThetaR() * 0.7)), 0, 0, 1);
-        glTranslatef(-player->ObtemRadiusColisao(), 0, 0.0);
 
     }
 
