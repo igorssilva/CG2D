@@ -98,7 +98,7 @@ GLuint tex_ceiling_width;
 GLuint tex_ceiling_height;
 
 
-int numberOfSquares = 50;
+int numberOfSquares = 10;
 
 void switch_light_mode() {
     GLfloat light_position_x = 0;
@@ -175,7 +175,7 @@ GLfloat NextPosition(GLfloat first, int current_index, GLfloat size) {
 void drawArena() {
 
 
-    GLfloat mat_blue[] = {0.0, 0.0, 1.0, 1.0};
+    GLfloat mat_blue[] = {1.0, 1.0, 1.0, 1.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_blue);
 
     GLfloat x0 = 0;
@@ -189,13 +189,13 @@ void drawArena() {
     GLfloat x_size = Width / (float) numberOfSquares;
     GLfloat y_size = Height / (float) numberOfSquares;
     GLfloat z_size = player->height() * 2 / (float) numberOfSquares;
+    cout <<x_size << endl;
 
-    //if (numberOfSquares == 1)
         glEnable(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, tex_floor);
-    float h_tex_div = 1.0f / (float) numberOfSquares;
-    float v_tex_div = 1.0f / (float) numberOfSquares;
+    float h_tex_div = 1.0f / (float) 1;
+    float v_tex_div = 1.0f / (float) 1;
 
     for (int i = 0; i < numberOfSquares; i++) {
 
@@ -203,8 +203,8 @@ void drawArena() {
         GLfloat h0 = CurrentPosition(x0, i, x_size);
         GLfloat h1 = NextPosition(x0, i, x_size);
 
-        GLfloat th0 = h_tex_div * i;
-        GLfloat th1 = h_tex_div * (i + 1);
+        GLfloat th0 = 0;
+        GLfloat th1 =1;
 
         for (int j = 0; j < numberOfSquares; j++) {
 
@@ -212,8 +212,8 @@ void drawArena() {
             GLfloat v1 = NextPosition(y0, j, y_size);
 
 
-            GLfloat tv0 = v_tex_div * j;
-            GLfloat tv1 = v_tex_div * (j + 1);
+            GLfloat tv0 = 0;
+            GLfloat tv1 = 1;
 
 
             glNormal3f(0, 0, 1);
@@ -241,16 +241,16 @@ void drawArena() {
         GLfloat h0 = CurrentPosition(x0, i, x_size);
         GLfloat h1 = NextPosition(x0, i, x_size);
 
-        GLfloat th0 = h_tex_div * i;
-        GLfloat th1 = h_tex_div * (i + 1);
+        GLfloat th0 = 0;
+        GLfloat th1 = 1;
 
         for (int j = 0; j < numberOfSquares; j++) {
             GLfloat v0 = CurrentPosition(y0, j, y_size);
             GLfloat v1 = NextPosition(y0, j, y_size);
 
 
-            GLfloat tv0 = v_tex_div * j;
-            GLfloat tv1 = v_tex_div * (j + 1);
+            GLfloat tv0 = 0;
+            GLfloat tv1 = 1;
 
             glNormal3f(0, 0, -1);
             glBegin(GL_QUADS);
@@ -276,16 +276,16 @@ void drawArena() {
         GLfloat h0 = CurrentPosition(x0, i, x_size);
         GLfloat h1 = NextPosition(x0, i, x_size);
 
-        GLfloat th0 = h_tex_div * i;
-        GLfloat th1 = h_tex_div * (i + 1);
+        GLfloat th0 = 0;
+        GLfloat th1 = 1;
 
         for (int j = 0; j < numberOfSquares; j++) {
             GLfloat v0 = CurrentPosition(z0, j, z_size);
             GLfloat v1 = NextPosition(z0, j, z_size);
 
 
-            GLfloat tv0 = v_tex_div * j;
-            GLfloat tv1 = v_tex_div * (j + 1);
+            GLfloat tv0 = 0;
+            GLfloat tv1 = 1;
 
             glNormal3f(0, 1, 0);
             glBegin(GL_QUADS);
@@ -311,16 +311,16 @@ void drawArena() {
         GLfloat h0 = CurrentPosition(y0, i, y_size);
         GLfloat h1 = NextPosition(y0, i, y_size);
 
-        GLfloat th0 = h_tex_div * i;
-        GLfloat th1 = h_tex_div * (i + 1);
+        GLfloat th0 = 0;
+        GLfloat th1 = 1;
 
         for (int j = 0; j < numberOfSquares; j++) {
             GLfloat v0 = CurrentPosition(z0, j, z_size);
             GLfloat v1 = NextPosition(z0, j, z_size);
 
 
-            GLfloat tv0 = v_tex_div * j;
-            GLfloat tv1 = v_tex_div * (j + 1);
+            GLfloat tv0 = 0;
+            GLfloat tv1 = 1;
 
             glNormal3f(-1, 0, 0);
             glBegin(GL_QUADS);
@@ -347,8 +347,8 @@ void drawArena() {
         GLfloat h0 = CurrentPosition(x0, i, x_size);
         GLfloat h1 = NextPosition(x0, i, x_size);
 
-        GLfloat th0 = h_tex_div * i;
-        GLfloat th1 = h_tex_div * (i + 1);
+        GLfloat th0 = 0;
+        GLfloat th1 = 1;
 
         if (i == numberOfSquares - 1) {
             h1 = x1;
@@ -359,8 +359,8 @@ void drawArena() {
             GLfloat v1 = NextPosition(z0, j, z_size);
 
 
-            GLfloat tv0 = v_tex_div * j;
-            GLfloat tv1 = v_tex_div * (j + 1);
+            GLfloat tv0 = 0;
+            GLfloat tv1 = 1;
 
 
             if (j == numberOfSquares - 1) {
@@ -390,8 +390,8 @@ void drawArena() {
         GLfloat h0 = CurrentPosition(y0, i, y_size);
         GLfloat h1 = NextPosition(y0, i, y_size);
 
-        GLfloat th0 = h_tex_div * i;
-        GLfloat th1 = h_tex_div * (i + 1);
+        GLfloat th0 = 0;
+        GLfloat th1 = 1;
 
         if (i == numberOfSquares - 1) {
             h1 = y1;
@@ -402,8 +402,8 @@ void drawArena() {
             GLfloat v1 = NextPosition(z0, j, z_size);
 
 
-            GLfloat tv0 = v_tex_div * j;
-            GLfloat tv1 = v_tex_div * (j + 1);
+            GLfloat tv0 = 0;
+            GLfloat tv1 = 1;
 
 
             if (j == numberOfSquares - 1) {
@@ -811,7 +811,7 @@ void keyPress(unsigned char key, int x, int y) {
             numberOfSquares = 50;
             break;
         case '6':
-            numberOfSquares = 1;
+            numberOfSquares = 10;
             break;
     }
 
