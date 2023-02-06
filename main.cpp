@@ -51,7 +51,7 @@ bool goForward = true;
 bool goBackwards = false;
 int punchingPosition = 0;
 int punchingCount = 0;
-int punchVelocity = 10;
+int punchVelocity = 1;
 int punchMaxCount = 5;
 bool punchingRight = true;
 bool punchingLeft = false;
@@ -175,8 +175,7 @@ GLfloat NextPosition(GLfloat first, int current_index, GLfloat size) {
 void drawArena() {
 
 
-
-    GLfloat mat_blue[] = {1.0, 1.0, 1.0, 1.0};
+    GLfloat mat_blue[] = {0.0, 0.0, 1.0, 1.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_blue);
 
     GLfloat x0 = 0;
@@ -191,7 +190,8 @@ void drawArena() {
     GLfloat y_size = Height / (float) numberOfSquares;
     GLfloat z_size = player->height() * 2 / (float) numberOfSquares;
 
-    glEnable(GL_TEXTURE_2D);
+    //if (numberOfSquares == 1)
+        glEnable(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, tex_floor);
     float h_tex_div = 1.0f / (float) numberOfSquares;
@@ -549,19 +549,37 @@ void setCamMode() {
         // Girar 90 graus no eixo X para que o eixo Z fique para cima
         glRotatef(-90, 1, 0, 0);
 
+        glTranslatef(0, -player->ObtemRadiusColisao() / 2, -player->ObtemRadiusColisao() / 2 / 5 - 5);
 
         // Girar o angulo theta no eixo Z para que o eixo X fique para frente
         glRotatef(-player->ObtemTheta() + 90, 0, 0, 1);
 
 
         // Mover o centro do mundo para o centro do jogador
-        glTranslatef(-player->ObtemX(), -player->ObtemY(), -player->center());
+        glTranslatef(-player->ObtemX(),
+                     -player->ObtemY(), -player->center());
 
 
     } else if (top_camera) {
         GLfloat eyeX = zoom * sin(toRad(theta)) * cos((toRad(phi))) + player->ObtemX();
         GLfloat eyeY = zoom * cos(toRad(theta)) * cos((toRad(phi))) + player->ObtemY();
         GLfloat eyeZ = zoom * sin(toRad(phi)) + player->center();
+        if (eyeX > Width) {
+            eyeX = Width;
+        } else if (eyeX < 0) {
+            eyeX = 0;
+        }
+        if (eyeY > Height) {
+            eyeY = Height;
+        } else if (eyeY < 0) {
+            eyeY = 0;
+        }
+
+        if (eyeZ > player->height() * 2) {
+            eyeZ = player->height() * 2;
+        } else if (eyeZ < 0) {
+            eyeZ = 0;
+        }
         GLfloat lookAtX = player->ObtemX();
         GLfloat lookAtY = player->ObtemY();
         GLfloat lookAtZ = player->center();
@@ -601,12 +619,14 @@ void opponentView() {
     glRotatef(-90, 1, 0, 0);
 
 
+    glTranslatef(0, -npc->ObtemRadiusColisao() / 2, -npc->ObtemRadiusColisao() / 2 / 5 - 5);
     // Girar o angulo theta no eixo Z para que o eixo X fique para frente
     glRotatef(-npc->ObtemTheta() + 90, 0, 0, 1);
 
 
     // Mover o centro do mundo para o centro do jogador
-    glTranslatef(-npc->ObtemX(), -npc->ObtemY(), -npc->center());
+    glTranslatef(-npc->ObtemX(), -npc->ObtemY(),
+                 -npc->center());
 
     drawElements();
 }
@@ -621,11 +641,15 @@ void drawElements() {
 
 void DrawMiniMap() {
     glScalef(0.1, 0.1, 0.1);
+    int width = TAM_JANELA;
+    if (bot_camera) {
+        width += 200;
+    }
 
     glMatrixMode(GL_PROJECTION);
     glPushMatrix(); // save
     glLoadIdentity();// and clear
-    glOrtho(0, TAM_JANELA, 0, TAM_JANELA, -1, 100);
+    glOrtho(0, width, 0, TAM_JANELA, -1, 100);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -639,10 +663,10 @@ void DrawMiniMap() {
     glColor3f(1, 1, 1);
     glLineWidth(2);
     glBegin(GL_LINE_LOOP);
-    glVertex3f(TAM_JANELA * 0.75, 0, 0);
-    glVertex3f(TAM_JANELA, 0, 0);
-    glVertex3f(TAM_JANELA, TAM_JANELA * 0.25, 0);
-    glVertex3f(TAM_JANELA * 0.75, TAM_JANELA * 0.25, 0);
+    glVertex3f(width * 0.75, 0, 0);
+    glVertex3f(width, 0, 0);
+    glVertex3f(width, TAM_JANELA * 0.25, 0);
+    glVertex3f(width * 0.75, TAM_JANELA * 0.25, 0);
     glEnd();
 
 
@@ -655,10 +679,10 @@ void DrawMiniMap() {
 
     glPushMatrix();
 
-    GLfloat x0 = (float) player->ObtemX() / Width * TAM_JANELA * 0.25;
+    GLfloat x0 = (float) player->ObtemX() / Width * width * 0.25;
     GLfloat y0 = (float) player->ObtemY() / Height * TAM_JANELA * 0.25;
     // translate to the player position proportionally to the minimap
-    glTranslatef(x0 + TAM_JANELA * 0.75, y0, 0);
+    glTranslatef(x0 + width * 0.75, y0, 0);
 
     glColor3f(0, 1, 0);
     glBegin(GL_POLYGON);
@@ -675,10 +699,10 @@ void DrawMiniMap() {
 
     glPushMatrix();
 
-    x0 = (float) npc->ObtemX() / Width * TAM_JANELA * 0.25;
+    x0 = (float) npc->ObtemX() / Width * width * 0.25;
     y0 = (float) npc->ObtemY() / Height * TAM_JANELA * 0.25;
     // translate to the player position proportionally to the minimap
-    glTranslatef(x0 + TAM_JANELA * 0.75, y0, 0);
+    glTranslatef(x0 + width * 0.75, y0, 0);
 
     glColor3f(1, 0, 0);
     glBegin(GL_POLYGON);
@@ -786,7 +810,7 @@ void keyPress(unsigned char key, int x, int y) {
         case '5':
             numberOfSquares = 50;
             break;
-            case '6':
+        case '6':
             numberOfSquares = 1;
             break;
     }
@@ -1090,7 +1114,7 @@ void init(void) {
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
 
     //Ajusta o tamanho da tela com a janela de visualizacao
-    gluPerspective(70, 1, 100, 10000);
+    gluPerspective(70, 1, 10, 10000);
 
 
     tex_floor = LoadTextureRAW("floor.bmp", tex_floor_width, tex_floor_height);

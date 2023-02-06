@@ -409,7 +409,9 @@ void Player::DefineMove(unsigned char key) {
 
 
 void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *anotherPlayer) {
-
+    if (timeDifference < 1){
+        timeDifference = 1;
+    }
     if (this->keyStatus[(int) ('a')] || this->keyStatus[(int) ('d')] || this->keyStatus[(int) ('w')] ||
         this->keyStatus[(int) ('s')]) {
         anotherPlayer->hit = false;
@@ -462,10 +464,11 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
 }
 
 void Player::moveLeg(GLdouble timeDifference) {
-    if (right_leg_up) {
+    GLfloat rotate = (INC_ROTATE * timeDifference);
 
-        gThetaRL += (int) (INC_ROTATE * timeDifference);
-        gThetaLL -= (int) (INC_ROTATE * timeDifference);
+    if (right_leg_up) {
+        gThetaRL += rotate;
+        gThetaLL -= rotate;
 
         if (gThetaRL >= max_angle_leg) {
             gThetaRL = max_angle_leg;
@@ -477,8 +480,8 @@ void Player::moveLeg(GLdouble timeDifference) {
         }
 
     } else {
-        gThetaRL -= (int) (INC_ROTATE * timeDifference);
-        gThetaLL += (int) (INC_ROTATE * timeDifference);
+        gThetaRL -= rotate;
+        gThetaLL += rotate;
 
         if (gThetaRL <= min_angle_leg) {
             gThetaRL = min_angle_leg;
