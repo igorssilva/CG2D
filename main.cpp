@@ -98,7 +98,7 @@ GLuint tex_ceiling_width;
 GLuint tex_ceiling_height;
 
 
-int numberOfSquares = 1;
+int numberOfSquares = 50;
 
 void switch_light_mode() {
     GLfloat light_position_x = 0;

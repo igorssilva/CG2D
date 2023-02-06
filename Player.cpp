@@ -230,6 +230,7 @@ void Player::Rotate(GLfloat inc) {
 void Player::Move(GLfloat inc) {
     this->gX += inc * cosf(toRad(this->gTheta));
     this->gY += inc * sinf(toRad(this->gTheta));
+    moveLeg(inc);
 }
 
 void Player::ResetaBracos() {
@@ -409,8 +410,8 @@ void Player::DefineMove(unsigned char key) {
 
 
 void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *anotherPlayer) {
-    if (timeDifference < 1){
-        timeDifference = 1;
+    if (timeDifference == 0){
+        timeDifference = 0.01;
     }
     if (this->keyStatus[(int) ('a')] || this->keyStatus[(int) ('d')] || this->keyStatus[(int) ('w')] ||
         this->keyStatus[(int) ('s')]) {
@@ -435,8 +436,6 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
         }
 
 
-        moveLeg(timeDifference);
-
         this->Move(-INC_MOVE * timeDifference);
 
         if (!this->isInbound(width, height) || this->isColliding(anotherPlayer)) {
@@ -453,7 +452,6 @@ void Player::Move(GLdouble timeDifference, GLint width, GLint height, Player *an
             this->Rotate(-INC_ROTATE / 5 * timeDifference);
         }
 
-        moveLeg(timeDifference);
         this->Move(INC_MOVE * timeDifference);
         if (!this->isInbound(width, height) || this->isColliding(anotherPlayer)) {
 
